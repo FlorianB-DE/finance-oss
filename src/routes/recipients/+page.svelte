@@ -10,10 +10,10 @@
 	type CountryOption = { code: string; name: string };
 	const countryOptions = countries as CountryOption[];
 
-const normalizeCountry = (value: string) => value.trim().slice(0, 2).toUpperCase();
+	const normalizeCountry = (value: string) => value.trim().slice(0, 2).toUpperCase();
 
-let countryValue = $state('DE');
-let messageState = $state<{ success?: boolean; message?: string; error?: string } | null>(null);
+	let countryValue = $state('DE');
+	let messageState = $state<{ success?: boolean; message?: string; error?: string } | null>(null);
 </script>
 
 <svelte:head>
@@ -50,7 +50,11 @@ let messageState = $state<{ success?: boolean; message?: string; error?: string 
 							method="POST"
 							action="?/delete"
 							use:enhance={({ formData, cancel }) => {
-								if (!confirm('Möchten Sie diesen Empfänger wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.')) {
+								if (
+									!confirm(
+										'Möchten Sie diesen Empfänger wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.'
+									)
+								) {
 									cancel();
 									return;
 								}
@@ -154,7 +158,7 @@ let messageState = $state<{ success?: boolean; message?: string; error?: string 
 					minlength="2"
 					maxlength="2"
 					bind:value={countryValue}
-					oninput={(event) => {
+					oninput={event => {
 						countryValue = normalizeCountry(event.currentTarget.value);
 					}}
 				/>

@@ -50,4 +50,3 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 	const authUrl = await generateAuthUrl(state, nonce, codeVerifier);
 	throw redirect(303, authUrl.href);
 };
-

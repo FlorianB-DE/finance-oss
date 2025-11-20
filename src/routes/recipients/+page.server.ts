@@ -6,11 +6,7 @@ import { fail, redirect } from '@sveltejs/kit';
 const recipientSchema = z.object({
 	name: z.string().min(2),
 	company: z.string().optional(),
-	email: z
-		.string()
-		.email()
-		.optional()
-		.or(z.literal('')),
+	email: z.string().email().optional().or(z.literal('')),
 	street: z.string().optional(),
 	postalCode: z.string().optional(),
 	city: z.string().optional(),

@@ -24,9 +24,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 	const userCount = await prisma.user.count();
 
 	const oidcEnabled =
-		!!process.env.OIDC_ISSUER &&
-		!!process.env.OIDC_CLIENT_ID &&
-		!!process.env.OIDC_CLIENT_SECRET;
+		!!process.env.OIDC_ISSUER && !!process.env.OIDC_CLIENT_ID && !!process.env.OIDC_CLIENT_SECRET;
 
 	return {
 		hasUser: userCount > 0,

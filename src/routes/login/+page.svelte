@@ -2,7 +2,10 @@
 	import { enhance } from '$app/forms';
 	import { page } from '$app/stores';
 
-	const { data, form } = $props<{ data: { hasUser: boolean; oidcEnabled: boolean }; form: unknown }>();
+	const { data, form } = $props<{
+		data: { hasUser: boolean; oidcEnabled: boolean };
+		form: unknown;
+	}>();
 	let activeTab = $state<'login' | 'register'>(data.hasUser ? 'login' : 'register');
 </script>
 

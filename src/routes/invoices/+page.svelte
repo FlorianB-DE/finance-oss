@@ -1,6 +1,6 @@
 <script lang="ts">
-import { enhance } from '$app/forms';
-import { invalidateAll } from '$app/navigation';
+	import { enhance } from '$app/forms';
+	import { invalidateAll } from '$app/navigation';
 	import type { PageData } from './$types';
 	import Message from '$lib/components/Message.svelte';
 
@@ -20,13 +20,12 @@ import { invalidateAll } from '$app/navigation';
 			? Number(data.settings.defaultTaxRate)
 			: 19;
 
-			const formState = $state({
+	const formState = $state({
 		recipientId: data.recipients[0]?.id ?? '',
 		issueDate: new Date().toISOString().slice(0, 10),
 		dueDate: '',
 		notes: ''
 	});
-
 
 	let items = $state<DraftItem[]>([
 		{ description: '', quantity: 1, unitPrice: 0, taxRate: Number(defaultTaxRate) }
@@ -77,7 +76,6 @@ import { invalidateAll } from '$app/navigation';
 		await fetch('?/create', { method: 'POST', body: formData });
 		location.reload();
 	};
-
 
 	const formatCurrency = (value: number) =>
 		new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(value ?? 0);
@@ -367,7 +365,11 @@ import { invalidateAll } from '$app/navigation';
 									method="POST"
 									action="?/delete"
 									use:enhance={({ formData, cancel }) => {
-										if (!confirm('Möchten Sie diese Rechnung wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.')) {
+										if (
+											!confirm(
+												'Möchten Sie diese Rechnung wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.'
+											)
+										) {
 											cancel();
 											return;
 										}

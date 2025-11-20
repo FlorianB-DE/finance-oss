@@ -84,10 +84,7 @@ export async function handleOidcCallback(
 	// Find or create user
 	let user = await prisma.user.findFirst({
 		where: {
-			OR: [
-				{ email },
-				{ oidcSub: sub, oidcProvider: process.env.OIDC_PROVIDER_NAME || 'oidc' }
-			]
+			OR: [{ email }, { oidcSub: sub, oidcProvider: process.env.OIDC_PROVIDER_NAME || 'oidc' }]
 		}
 	});
 

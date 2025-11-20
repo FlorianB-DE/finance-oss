@@ -27,12 +27,7 @@ export const GET: RequestHandler = async ({ url, cookies, request }) => {
 	}
 
 	try {
-		const { session } = await handleOidcCallback(
-			url,
-			storedCodeVerifier,
-			storedState,
-			storedNonce
-		);
+		const { session } = await handleOidcCallback(url, storedCodeVerifier, storedState, storedNonce);
 		cookies.set(SESSION_COOKIE, session.id, getSessionCookieAttributes(session.expiresAt));
 		throw redirect(303, nextUrl);
 	} catch (error) {
@@ -41,4 +36,3 @@ export const GET: RequestHandler = async ({ url, cookies, request }) => {
 		throw redirect(303, `/login?error=${encodeURIComponent(errorMessage)}`);
 	}
 };
-

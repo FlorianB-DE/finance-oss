@@ -148,7 +148,7 @@ export const actions: Actions = {
 			if (invoice.pdfPath) {
 				const pdfPath = path.join(staticDir, invoice.pdfPath);
 				if (existsSync(pdfPath)) {
-					await unlink(pdfPath).catch((err) => {
+					await unlink(pdfPath).catch(err => {
 						console.error('Failed to delete PDF file:', err);
 					});
 				}
@@ -156,7 +156,7 @@ export const actions: Actions = {
 			if (invoice.xmlPath) {
 				const xmlPath = path.join(staticDir, invoice.xmlPath);
 				if (existsSync(xmlPath)) {
-					await unlink(xmlPath).catch((err) => {
+					await unlink(xmlPath).catch(err => {
 						console.error('Failed to delete XML file:', err);
 					});
 				}
@@ -166,7 +166,7 @@ export const actions: Actions = {
 			const invoiceFolder = path.join(staticDir, 'invoices', invoice.number);
 			if (existsSync(invoiceFolder)) {
 				const { rm } = await import('node:fs/promises');
-				await rm(invoiceFolder, { recursive: true, force: true }).catch((err) => {
+				await rm(invoiceFolder, { recursive: true, force: true }).catch(err => {
 					console.error('Failed to delete invoice folder:', err);
 				});
 			}

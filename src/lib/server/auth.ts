@@ -24,8 +24,6 @@ export async function verifyPassword(password: string, hash: string) {
 	return Bun.password.verify(password, hash);
 }
 
-
-
 export async function getUserByEmail(email: string) {
 	return prisma.user.findUnique({ where: { email } });
 }
