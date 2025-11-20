@@ -75,7 +75,7 @@
 				{settings.companyName ?? settings.personName ?? ''}
 			</p>
 			<p class="text-xs whitespace-pre-line text-[#4c5a88]" data-field="seller-address">
-				{#each sellerLines as line, index}
+				{#each sellerLines as line, index (index)}
 					<span>{line}</span>{#if index < sellerLines.length - 1}<br />{/if}
 				{/each}
 			</p>
@@ -86,7 +86,7 @@
 				{invoice.recipient.name}
 			</p>
 			<p class="text-xs whitespace-pre-line text-[#4c5a88]" data-field="recipient-address">
-				{#each recipientLines as line, index}
+				{#each recipientLines as line, index (index)}
 					<span>{line}</span>{#if index < recipientLines.length - 1}<br />{/if}
 				{/each}
 			</p>
@@ -135,7 +135,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				{#each invoice.lineItems as item, index}
+				{#each invoice.lineItems as item, index (item.id ?? index)}
 					<tr data-row="item">
 						<td
 							class="px-3 py-3.5 {index < invoice.lineItems.length - 1
@@ -209,7 +209,7 @@
 				Bitte überweisen Sie auf folgendes Konto
 			</p>
 			<ul class="m-0 list-none p-0 text-[13px] text-[#1f2a44]">
-				{#each paymentLines as line, index}
+				{#each paymentLines as line, index (index)}
 					<li class={index > 0 ? 'mt-1' : ''} data-payment={`payment-${index}`}>{line}</li>
 				{/each}
 			</ul>

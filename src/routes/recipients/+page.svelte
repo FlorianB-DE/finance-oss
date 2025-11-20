@@ -38,7 +38,7 @@
 			<p class="text-sm text-gray-500">Noch keine Empfänger.</p>
 		{:else}
 			<ul class="divide-y divide-gray-100">
-				{#each data.recipients as recipient}
+				{#each data.recipients as recipient (recipient.id)}
 					<li class="flex items-center justify-between py-4">
 						<div>
 							<p class="text-base font-semibold text-gray-900">{recipient.name}</p>
@@ -49,7 +49,7 @@
 						<form
 							method="POST"
 							action="?/delete"
-							use:enhance={({ formData, cancel }) => {
+							use:enhance={({ cancel }) => {
 								if (
 									!confirm(
 										'Möchten Sie diesen Empfänger wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.'
@@ -163,7 +163,7 @@
 					}}
 				/>
 				<datalist id="country-options">
-					{#each countryOptions as option}
+					{#each countryOptions as option (option.code)}
 						<option value={option.code}>
 							{option.name} ({option.code})
 						</option>

@@ -1,7 +1,8 @@
 <script lang="ts">
 	import '$lib/layout.css';
 	import favicon from '$lib/assets/favicon.svg';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
+	import { resolve } from '$app/paths';
 
 	let { children, data } = $props();
 
@@ -10,7 +11,7 @@
 		{ href: '/invoices', label: 'Rechnungen' },
 		{ href: '/recipients', label: 'Empfänger' },
 		{ href: '/settings', label: 'Einstellungen' }
-	];
+	] as const;
 </script>
 
 <svelte:head>
@@ -35,12 +36,12 @@
 					</div>
 				</div>
 				<nav class="flex gap-6 text-sm font-medium text-gray-500">
-					{#each navigation as item}
+					{#each navigation as item (item.href)}
 						<a
-							href={item.href}
+							href={resolve(item.href)}
 							class={`transition hover:text-gray-900 ${
-								$page.url.pathname === item.href ||
-								($page.url.pathname.startsWith(item.href) && item.href !== '/')
+								page.url.pathname === item.href ||
+								(page.url.pathname.startsWith(item.href) && item.href !== '/')
 									? 'text-gray-900'
 									: ''
 							}`}>{item.label}</a

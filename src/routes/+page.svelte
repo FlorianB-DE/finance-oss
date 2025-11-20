@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import { resolve } from '$app/paths';
 
 	const { data } = $props<{ data: PageData }>();
 
@@ -49,14 +50,14 @@
 			</div>
 			<a
 				class="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white shadow hover:bg-primary-600"
-				href="/invoices">Neue Rechnung</a
+				href={resolve('/invoices')}>Neue Rechnung</a
 			>
 		</div>
 		<div class="space-y-3">
 			{#if data.invoices.length === 0}
 				<p class="text-sm text-gray-500">Noch keine Rechnungen.</p>
 			{:else}
-				{#each data.invoices as invoice}
+				{#each data.invoices as invoice (invoice.id)}
 					<div
 						class="flex items-center justify-between rounded-xl border border-gray-100 px-4 py-3"
 					>

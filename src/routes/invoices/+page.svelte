@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import type { PageData } from './$types';
 	import Message from '$lib/components/Message.svelte';
 
@@ -108,7 +109,7 @@
 						class="mt-1 w-full rounded-xl border border-gray-200 px-4 py-2"
 						bind:value={formState.recipientId}
 					>
-						{#each data.recipients as recipient}
+						{#each data.recipients as recipient (recipient.id)}
 							<option value={recipient.id}>{recipient.name}</option>
 						{/each}
 					</select>
@@ -138,7 +139,7 @@
 			</div>
 
 			<div class="space-y-4">
-				{#each items as item, index}
+				{#each items as item, index (index)}
 					<div
 						class="grid gap-3 rounded-2xl border border-gray-100 p-4 md:grid-cols-[2fr,repeat(3,1fr),auto]"
 					>
@@ -244,7 +245,7 @@
 				{#if data.invoices.length === 0}
 					<p class="text-sm text-gray-500">Noch keine Rechnungen vorhanden.</p>
 				{:else}
-					{#each data.invoices as invoice}
+					{#each data.invoices as invoice (invoice.id)}
 						<div class="rounded-xl border border-gray-100 p-4">
 							<div class="flex items-center justify-between">
 								<div>
@@ -262,7 +263,7 @@
 								{#if invoice.pdfPath}
 									<a
 										class="rounded-full border border-gray-200 px-3 py-1 text-gray-600 hover:text-gray-900"
-										href={`/invoices/${invoice.number}/download`}
+										href={resolve(`/invoices/${invoice.number}/download`)}
 										target="_blank"
 										rel="noopener noreferrer"
 									>
@@ -364,7 +365,7 @@
 								<form
 									method="POST"
 									action="?/delete"
-									use:enhance={({ formData, cancel }) => {
+									use:enhance={({ cancel }) => {
 										if (
 											!confirm(
 												'Möchten Sie diese Rechnung wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.'

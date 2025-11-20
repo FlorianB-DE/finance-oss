@@ -1,6 +1,7 @@
 # Finances OSS
 
 Finances OSS is a SvelteKit-based prototype for managing freelance-style invoices end to end. It bundles:
+
 - Secure session-based authentication with optional OIDC sign-in.
 - Invoice CRUD flows and date/amount validation powered by Zod.
 - Prisma + SQLite persistence for users, sessions, and invoices.

@@ -81,7 +81,7 @@
 	<section class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
 		<h1 class="text-2xl font-semibold text-gray-900">Unternehmensdaten</h1>
 		<div class="mt-6 grid gap-4 md:grid-cols-2">
-			{#each fields as field}
+			{#each fields as field (field.name)}
 				<div>
 					<label class="text-sm font-medium text-gray-700" for={`settings-${field.name}`}>
 						{field.label}

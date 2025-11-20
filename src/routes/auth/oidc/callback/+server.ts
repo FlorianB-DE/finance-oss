@@ -2,9 +2,8 @@ import { redirect } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { handleOidcCallback } from '$lib/server/oidc';
 import { SESSION_COOKIE, getSessionCookieAttributes } from '$lib/server/auth';
-import { dev } from '$app/environment';
 
-export const GET: RequestHandler = async ({ url, cookies, request }) => {
+export const GET: RequestHandler = async ({ url, cookies }) => {
 	const error = url.searchParams.get('error');
 
 	if (error) {

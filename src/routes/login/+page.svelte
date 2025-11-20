@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { page } from '$app/stores';
+	import { resolve } from '$app/paths';
+	import { page } from '$app/state';
+	import type { RouteId } from './$types';
 
 	const { data, form } = $props<{
 		data: { hasUser: boolean; oidcEnabled: boolean };
@@ -106,9 +108,9 @@
 				<div class="flex-1 border-t border-gray-200"></div>
 			</div>
 
-			{@const nextUrl = $page.url.searchParams.get('next') || '/'}
+			{@const nextUrl = page.url.searchParams.get('next') || '/'}
 			<a
-				href="/auth/oidc?next={encodeURIComponent(nextUrl)}"
+				href={resolve(`/auth/oidc?next=${encodeURIComponent(nextUrl)}` as RouteId)}
 				class="flex w-full items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 text-base font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50"
 			>
 				<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
