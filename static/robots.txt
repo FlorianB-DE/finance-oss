@@ -1,0 +1,3 @@
+# disallow crawling everywhere (non-production content)
+User-agent: *
+Disallow: /

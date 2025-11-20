@@ -1,0 +1,110 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  CANCELLED
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  email        String    @unique
+  passwordHash String?
+  oidcProvider String?  // e.g., "google", "keycloak", "auth0"
+  oidcSub      String?  // OIDC subject identifier
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  sessions     Session[]
+  
+  @@unique([oidcProvider, oidcSub])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+}
+
+model Settings {
+  id                 Int      @id @default(1)
+  personName         String?
+  companyName        String?
+  legalStatus        String?
+  defaultTaxRate     Decimal?
+  vatId              String?
+  taxNumber          String?
+  wirtschaftsIdentNr String?
+  street             String?
+  postalCode         String?
+  city               String?
+  country            String?
+  iban               String?
+  bic                String?
+  emailFrom          String?
+  smtpHost           String?
+  smtpPort           Int?
+  smtpUser           String?
+  smtpPassword       String?
+  emailSignature     String?
+  lastInvoiceCounter Int      @default(0)
+  invoicePrefix      String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model Recipient {
+  id          Int       @id @default(autoincrement())
+  name        String
+  company     String?
+  email       String?
+  street      String?
+  postalCode  String?
+  city        String?
+  country     String?
+  createdAt   DateTime  @default(now())
+  invoices    Invoice[]
+}
+
+model Invoice {
+  id          Int            @id @default(autoincrement())
+  number      String         @unique
+  issueDate   DateTime       @default(now())
+  dueDate     DateTime
+  currency    String         @default("EUR")
+  recipient   Recipient      @relation(fields: [recipientId], references: [id])
+  recipientId Int
+  status      InvoiceStatus  @default(DRAFT)
+  notes       String?
+  totalNet    Decimal
+  totalTax    Decimal
+  totalGross  Decimal
+  pdfPath     String?
+  xmlPath     String?
+  texPath     String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  lineItems   InvoiceLineItem[]
+}
+
+model InvoiceLineItem {
+  id          Int      @id @default(autoincrement())
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  invoiceId   Int
+  description String
+  quantity    Decimal  @default(1)
+  unitPrice   Decimal
+  taxRate     Decimal
+  position    Int
+  createdAt   DateTime @default(now())
+}
+

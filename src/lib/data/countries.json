@@ -1,0 +1,28 @@
+[
+	{ "code": "DE", "name": "Deutschland" },
+	{ "code": "AT", "name": "Österreich" },
+	{ "code": "CH", "name": "Schweiz" },
+	{ "code": "BE", "name": "Belgien" },
+	{ "code": "CZ", "name": "Tschechien" },
+	{ "code": "DK", "name": "Dänemark" },
+	{ "code": "ES", "name": "Spanien" },
+	{ "code": "FI", "name": "Finnland" },
+	{ "code": "FR", "name": "Frankreich" },
+	{ "code": "GB", "name": "Vereinigtes Königreich" },
+	{ "code": "HU", "name": "Ungarn" },
+	{ "code": "IE", "name": "Irland" },
+	{ "code": "IT", "name": "Italien" },
+	{ "code": "LU", "name": "Luxemburg" },
+	{ "code": "NL", "name": "Niederlande" },
+	{ "code": "NO", "name": "Norwegen" },
+	{ "code": "PL", "name": "Polen" },
+	{ "code": "PT", "name": "Portugal" },
+	{ "code": "RO", "name": "Rumänien" },
+	{ "code": "SE", "name": "Schweden" },
+	{ "code": "SI", "name": "Slowenien" },
+	{ "code": "SK", "name": "Slowakei" },
+	{ "code": "US", "name": "USA" },
+	{ "code": "CA", "name": "Kanada" },
+	{ "code": "AU", "name": "Australien" }
+]
+
