@@ -1,22 +1,30 @@
-import type { Handle } from '@sveltejs/kit';
+import type { Handle, HandleServerError } from '@sveltejs/kit';
 import { SESSION_COOKIE, getSessionUser } from '$lib/server/auth';
 import { redirect } from '@sveltejs/kit';
+import { createLogger } from '$lib/server/logger';
 
+const log = createLogger({ component: 'hooks' });
 const UNPROTECTED_PATHS = ['/login', '/api/public/health', '/auth/oidc'];
 
 export const handle: Handle = async ({ event, resolve }) => {
 	const token = event.cookies.get(SESSION_COOKIE);
 
 	if (token) {
-		const user = await getSessionUser(token);
-		event.locals.user = user
-			? {
-					id: user.id,
-					email: user.email
-				}
-			: null;
+		try {
+			const user = await getSessionUser(token);
+			event.locals.user = user
+				? {
+						id: user.id,
+						email: user.email
+					}
+				: null;
 
-		if (!user) {
+			if (!user) {
+				event.cookies.delete(SESSION_COOKIE, { path: '/' });
+			}
+		} catch (error) {
+			log.error({ err: error, path: event.url.pathname }, 'Error getting session user');
+			event.locals.user = null;
 			event.cookies.delete(SESSION_COOKIE, { path: '/' });
 		}
 	} else {
@@ -35,5 +43,34 @@ export const handle: Handle = async ({ event, resolve }) => {
 		return new Response('Nicht autorisiert', { status: 401 });
 	}
 
-	return resolve(event);
+	try {
+		return await resolve(event);
+	} catch (error) {
+		log.error(
+			{
+				err: error,
+				path: event.url.pathname,
+				method: event.request.method
+			},
+			'Error handling request'
+		);
+		throw error;
+	}
+};
+
+export const handleError: HandleServerError = ({ error, event, status, message }) => {
+	log.error(
+		{
+			err: error,
+			status,
+			message,
+			path: event.url.pathname,
+			method: event.request.method
+		},
+		'Server error'
+	);
+
+	return {
+		message: status === 500 ? 'Internal Server Error' : message
+	};
 };
