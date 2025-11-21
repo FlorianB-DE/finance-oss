@@ -1,5 +1,5 @@
 import { prisma } from '$lib/server/prisma';
-import type { Invoice } from '@prisma/client';
+import type { Invoice } from '$lib/server/prisma/client';
 import { getNextInvoiceNumber } from '$lib/server/settings';
 import { addDays } from 'date-fns';
 import { generateZugferdArtifacts } from '$lib/server/zugferd';

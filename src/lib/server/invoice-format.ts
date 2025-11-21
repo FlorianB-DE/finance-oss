@@ -1,4 +1,4 @@
-import type { Prisma } from '@prisma/client';
+import type { Prisma } from '$lib/server/prisma/client';
 
 export type InvoiceWithRelations = Prisma.InvoiceGetPayload<{
 	include: { recipient: true; lineItems: true };

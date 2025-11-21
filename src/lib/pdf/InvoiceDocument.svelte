@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Settings } from '@prisma/client';
+	import type { Settings } from '$lib/server/prisma/client';
 	import type { RenderInvoice } from '$lib/server/invoice-format';
 	import { format } from 'date-fns';
 

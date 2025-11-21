@@ -1,5 +1,5 @@
 import { prisma } from '$lib/server/prisma';
-import type { Settings } from '@prisma/client';
+import type { Settings } from '$lib/server/prisma/client';
 
 const SETTINGS_ID = 1;
 
