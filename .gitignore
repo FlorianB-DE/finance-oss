@@ -34,3 +34,5 @@ vendor/LaTeX-ZUGFeRD
 
 /.cache/*
 !/.cache/.gitkeep
+
+/src/lib/server/prisma

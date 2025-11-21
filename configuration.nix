@@ -28,6 +28,7 @@ in {
     git
     openssl
     prisma
+    prisma-engines
     sqlite
   ];
 
@@ -35,8 +36,8 @@ in {
     enable = true;
     description = "Finances SvelteKit service";
 
-    # Make rsync available
-    path = [ pkgs.rsync ];
+    # Make rsync and bun available for preStart
+    path = [ pkgs.rsync pkgs.bun ];
 
     wantedBy = [ "multi-user.target" ];
     after = [ "network.target" ];
@@ -63,27 +64,27 @@ in {
 
       # also good practice to set this:
       XDG_CACHE_HOME = "/var/cache/finances";
+
+      # Use system Prisma engines instead of downloading them
+      PKG_CONFIG_PATH = "${pkgs.openssl.dev}/lib/pkgconfig";
+      PRISMA_SCHEMA_ENGINE_BINARY = "${pkgs.prisma-engines}/bin/schema-engine";
+      PRISMA_QUERY_ENGINE_BINARY = "${pkgs.prisma-engines}/bin/query-engine";
+      PRISMA_QUERY_ENGINE_LIBRARY = "${pkgs.prisma-engines}/lib/libquery_engine.node";
+      PRISMA_FMT_BINARY = "${pkgs.prisma-engines}/bin/prisma-fmt";
     };
 
     # -------------------------
     #      PREPARE DIRS
     # -------------------------
     preStart = ''
-      # copy build to writable place to avoid Bun writing into /nix/store
+      # Copy from Nix store to writable location
       rsync -a --delete ${finances-app}/build/ /var/lib/finances/server/
+      rsync -a --delete ${finances-app}/prisma/ /var/lib/finances/prisma/
 
-      # copy package.json and prisma schema (needed for migrations)
-      cp ${finances-app}/package.json /var/lib/finances/server/
-      cp -r ${finances-app}/prisma /var/lib/finances/server/
-
-      # Generate Prisma client in the server directory
-      # This ensures the client is generated for the correct platform
-      cd /var/lib/finances/server
-      ${pkgs.prisma}/bin/prisma generate --schema ./prisma/schema.prisma
-
-      # ensure tmp exists inside systemd RuntimeDirectory
-      mkdir -p /run/finances/tmp
-      chmod 700 /run/finances/tmp
+      # Install @prisma/client (needed for TypeScript types and client code)
+      # Prisma engines come from system packages via environment variables
+      cd /var/lib/private/finances/server
+      ${bun}/bin/bun install --frozen-lockfile --production --no-save @prisma/client
     '';
 
     # -------------------------
@@ -96,14 +97,13 @@ in {
       # NixOS-managed writable directories
       StateDirectory  = [ "finances" "finances/server" ];     # /var/lib/finances, /var/lib/finances/server
       CacheDirectory  = "finances";       # /var/cache/finances
-      RuntimeDirectory = "finances/tmp";  # /run/finances/tmp
 
       # where server actually runs
       WorkingDirectory = "/var/lib/finances/server";
 
-      # Prisma migrations
+      # Prisma migrations (use system Prisma CLI)
       ExecStartPre = [
-        "${pkgs.prisma}/bin/prisma migrate deploy --schema /var/lib/finances/server/prisma/schema.prisma"
+        "${pkgs.prisma}/bin/prisma migrate deploy --schema /var/lib/finances/prisma/schema.prisma"
       ];
 
       ExecStart = "${bun}/bin/bun /var/lib/finances/server/index.js";
