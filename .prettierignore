@@ -15,3 +15,5 @@ bun.lockb
 /build/
 /public/
 /static/
+
+/src/lib/server/prisma
