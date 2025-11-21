@@ -9,7 +9,10 @@ import {
 	getSessionCookieAttributes,
 	verifyPassword
 } from '$lib/server/auth';
+import { createLogger } from '$lib/server/logger';
 import { z } from 'zod';
+
+const log = createLogger({ route: 'login' });
 
 const loginSchema = z.object({
 	email: z.string().email('Bitte gültige E-Mail').toLowerCase(),
@@ -25,6 +28,16 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	const oidcEnabled =
 		!!process.env.OIDC_ISSUER && !!process.env.OIDC_CLIENT_ID && !!process.env.OIDC_CLIENT_SECRET;
+
+	log.info(
+		{
+			oidcEnabled,
+			hasIssuer: !!process.env.OIDC_ISSUER,
+			hasClientId: !!process.env.OIDC_CLIENT_ID,
+			hasClientSecret: !!process.env.OIDC_CLIENT_SECRET
+		},
+		'OIDC availability check'
+	);
 
 	return {
 		hasUser: userCount > 0,

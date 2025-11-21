@@ -9,11 +9,11 @@
   defaultLocale = "de_DE.UTF-8";
 
   bun = pkgs.bun;
-  version = "2025-11-21_14-47-12";
+  version = "2025-11-21_18-16-54";
 
   finances-tarball = pkgs.fetchzip {
     url = "https://github.com/florianb-de/finance-oss/releases/download/${version}/finances-build.tar.gz";
-    hash = "sha256-29dhHLO3h62mqr+OX0Q2R9kBntj5YfrmcpOh1Z1OtfQ=";
+    hash = "sha256-RTLxi+pycpaWW0PnkamJnxToTW0fzQHQCTrUhU9O9tU=";
     stripRoot = false;
   };
 
@@ -35,10 +35,6 @@
       
       # Copy prisma schema
       cp -r $src/prisma $out/
-      
-      # Copy package.json and bun.lock (for reference, not needed at runtime)
-      cp $src/package.json $out/
-      cp $src/bun.lock $out/ 2>/dev/null || true
       
       if [ -d $src/node_module ]; then
         mkdir -p $out/node_modules

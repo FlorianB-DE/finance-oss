@@ -37,7 +37,7 @@ export async function generateAuthUrl(state: string, nonce: string, codeVerifier
 
 	const redirectUri =
 		process.env.OIDC_REDIRECT_URI ||
-		`${process.env.PUBLIC_APP_URL || 'http://localhost:5173'}/auth/oidc/callback`;
+		`${process.env.ORIGIN || 'http://localhost:5173'}/auth/oidc/callback`;
 
 	const codeChallenge = await oidc.calculatePKCECodeChallenge(codeVerifier);
 
