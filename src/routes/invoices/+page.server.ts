@@ -8,7 +8,7 @@ import { sendInvoiceEmail } from '$lib/server/mailer';
 import { unlink } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
-import type { InvoiceStatus } from '@prisma/client';
+import type { InvoiceStatus } from '$lib/server/prisma/client';
 import { getInvoiceOutputDir, resolveInvoiceFile } from '$lib/server/invoice-storage';
 import { createLogger } from '$lib/server/logger';
 

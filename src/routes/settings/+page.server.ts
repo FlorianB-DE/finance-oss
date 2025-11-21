@@ -2,7 +2,7 @@ import type { Actions, PageServerLoad } from './$types';
 import { getOrCreateSettings, updateSettings } from '$lib/server/settings';
 import { z } from 'zod';
 import { fail } from '@sveltejs/kit';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '$lib/server/prisma/client';
 import { createLogger } from '$lib/server/logger';
 
 const log = createLogger({ route: 'settings' });
