@@ -22,5 +22,8 @@ export function resolveInvoiceFile(storedPath?: string | null) {
 }
 
 export function toStoredInvoicePath(fullPath: string) {
-	return path.relative('.', path.resolve(fullPath));
+	const outputDir = getInvoiceOutputDir();
+	const resolved = path.resolve(fullPath);
+	// Return path relative to the invoice output directory
+	return path.relative(outputDir, resolved);
 }
