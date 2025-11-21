@@ -1,7 +1,10 @@
 import nodemailer from 'nodemailer';
 import { getOrCreateSettings } from '$lib/server/settings';
 import { prisma } from '$lib/server/prisma';
-import path from 'node:path';
+import { resolveInvoiceFile } from '$lib/server/invoice-storage';
+import { createLogger } from '$lib/server/logger';
+
+const log = createLogger({ module: 'mailer' });
 
 export async function sendInvoiceEmail(invoiceId: number) {
 	const settings = await getOrCreateSettings();
@@ -35,7 +38,10 @@ export async function sendInvoiceEmail(invoiceId: number) {
 				: undefined
 	});
 
-	const attachmentPath = path.resolve('static', invoice.pdfPath);
+	const attachmentPath = resolveInvoiceFile(invoice.pdfPath);
+	if (!attachmentPath) {
+		throw new Error('Pfad zur Rechnung konnte nicht aufgelöst werden');
+	}
 
 	await transport.sendMail({
 		from: settings.emailFrom,
@@ -51,6 +57,11 @@ export async function sendInvoiceEmail(invoiceId: number) {
 			}
 		]
 	});
+
+	log.info(
+		{ invoiceId, invoiceNumber: invoice.number, recipient: invoice.recipient.email },
+		'Invoice email sent'
+	);
 
 	return { ok: true };
 }

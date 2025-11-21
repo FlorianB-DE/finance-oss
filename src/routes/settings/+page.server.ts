@@ -3,6 +3,9 @@ import { getOrCreateSettings, updateSettings } from '$lib/server/settings';
 import { z } from 'zod';
 import { fail } from '@sveltejs/kit';
 import { Prisma } from '@prisma/client';
+import { createLogger } from '$lib/server/logger';
+
+const log = createLogger({ route: 'settings' });
 
 const schema = z.object({
 	personName: z.string().optional(),
@@ -78,7 +81,7 @@ export const actions: Actions = {
 			await updateSettings(sanitized);
 			return { success: true };
 		} catch (error) {
-			console.error('Failed to update settings:', error);
+			log.error({ err: error }, 'Failed to update settings');
 			return fail(500, { error: 'Fehler beim Speichern der Einstellungen' });
 		}
 	}

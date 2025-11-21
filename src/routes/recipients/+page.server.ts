@@ -2,6 +2,9 @@ import type { Actions, PageServerLoad } from './$types';
 import { prisma } from '$lib/server/prisma';
 import { z } from 'zod';
 import { fail, redirect } from '@sveltejs/kit';
+import { createLogger } from '$lib/server/logger';
+
+const log = createLogger({ route: 'recipients' });
 
 const recipientSchema = z.object({
 	name: z.string().min(2),
@@ -69,7 +72,7 @@ export const actions: Actions = {
 
 			return { success: true, message: 'Empfänger erfolgreich gelöscht!' };
 		} catch (error) {
-			console.error('Failed to delete recipient:', error);
+			log.error({ err: error, recipientId: id }, 'Failed to delete recipient');
 			return fail(500, { error: 'Fehler beim Löschen des Empfängers' });
 		}
 	}

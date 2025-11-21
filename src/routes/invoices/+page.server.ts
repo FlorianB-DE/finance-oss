@@ -9,6 +9,10 @@ import { unlink } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import type { InvoiceStatus } from '@prisma/client';
+import { getInvoiceOutputDir, resolveInvoiceFile } from '$lib/server/invoice-storage';
+import { createLogger } from '$lib/server/logger';
+
+const log = createLogger({ route: 'invoices' });
 
 const itemSchema = z.object({
 	description: z.string().min(2),
@@ -95,7 +99,7 @@ export const actions: Actions = {
 			});
 			return { success: true, message: 'ZUGFeRD erfolgreich neu generiert!' };
 		} catch (error) {
-			console.error('Failed to regenerate invoice:', error);
+			log.error({ err: error, invoiceId: id }, 'Failed to regenerate invoice');
 			return fail(500, { error: 'Fehler beim Generieren der Rechnung' });
 		}
 	},
@@ -108,7 +112,7 @@ export const actions: Actions = {
 			await markInvoiceStatus(id, 'SENT');
 			return { success: true, message: 'Rechnung erfolgreich versendet!' };
 		} catch (error) {
-			console.error('Failed to send invoice:', error);
+			log.error({ err: error, invoiceId: id }, 'Failed to send invoice email');
 			return fail(500, { error: 'Fehler beim Versenden der Rechnung' });
 		}
 	},
@@ -121,7 +125,7 @@ export const actions: Actions = {
 			await markInvoiceStatus(id, status as InvoiceStatus);
 			return { success: true, message: 'Status erfolgreich aktualisiert!' };
 		} catch (error) {
-			console.error('Failed to update status:', error);
+			log.error({ err: error, invoiceId: id, status }, 'Failed to update invoice status');
 			return fail(500, { error: 'Fehler beim Aktualisieren des Status' });
 		}
 	},
@@ -144,36 +148,35 @@ export const actions: Actions = {
 			await prisma.invoice.delete({ where: { id } });
 
 			// Delete associated files if they exist
-			const staticDir = path.resolve('static');
 			if (invoice.pdfPath) {
-				const pdfPath = path.join(staticDir, invoice.pdfPath);
-				if (existsSync(pdfPath)) {
+				const pdfPath = resolveInvoiceFile(invoice.pdfPath);
+				if (pdfPath && existsSync(pdfPath)) {
 					await unlink(pdfPath).catch(err => {
-						console.error('Failed to delete PDF file:', err);
+						log.error({ err, invoiceNumber: invoice.number }, 'Failed to delete invoice PDF');
 					});
 				}
 			}
 			if (invoice.xmlPath) {
-				const xmlPath = path.join(staticDir, invoice.xmlPath);
-				if (existsSync(xmlPath)) {
+				const xmlPath = resolveInvoiceFile(invoice.xmlPath);
+				if (xmlPath && existsSync(xmlPath)) {
 					await unlink(xmlPath).catch(err => {
-						console.error('Failed to delete XML file:', err);
+						log.error({ err, invoiceNumber: invoice.number }, 'Failed to delete invoice XML');
 					});
 				}
 			}
 
 			// Try to delete the invoice folder if it exists
-			const invoiceFolder = path.join(staticDir, 'invoices', invoice.number);
+			const invoiceFolder = path.join(getInvoiceOutputDir(), invoice.number);
 			if (existsSync(invoiceFolder)) {
 				const { rm } = await import('node:fs/promises');
 				await rm(invoiceFolder, { recursive: true, force: true }).catch(err => {
-					console.error('Failed to delete invoice folder:', err);
+					log.error({ err, invoiceNumber: invoice.number }, 'Failed to delete invoice folder');
 				});
 			}
 
 			return { success: true, message: 'Rechnung erfolgreich gelöscht!' };
 		} catch (error) {
-			console.error('Failed to delete invoice:', error);
+			log.error({ err: error, invoiceId: id }, 'Failed to delete invoice');
 			return fail(500, { error: 'Fehler beim Löschen der Rechnung' });
 		}
 	}

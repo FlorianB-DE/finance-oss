@@ -20,6 +20,7 @@
 			}
 		}
 	},
+	"forwardPorts": [5173],
 	"containerEnv": {
 		"PUPPETEER_PRODUCT": "chrome-headless-shell",
 		"PUPPETEER_CACHE_DIR": ".cache/puppeteer"

@@ -1,8 +1,10 @@
 import * as oidc from 'openid-client';
 import { prisma } from '$lib/server/prisma';
 import { createSession } from './auth';
+import { createLogger } from '$lib/server/logger';
 
 let config: oidc.Configuration | null = null;
+const log = createLogger({ module: 'oidc' });
 
 export async function getOidcConfig() {
 	if (!process.env.OIDC_ISSUER || !process.env.OIDC_CLIENT_ID || !process.env.OIDC_CLIENT_SECRET) {
@@ -22,7 +24,7 @@ export async function getOidcConfig() {
 
 		return config;
 	} catch (error) {
-		console.error('Failed to initialize OIDC config:', error);
+		log.error({ err: error }, 'Failed to initialize OIDC config');
 		return null;
 	}
 }

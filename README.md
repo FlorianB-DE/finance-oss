@@ -21,7 +21,7 @@ bunx puppeteer browser install chrome-headless-shell
 bun run dev
 ```
 
-Environment variables belong in `.env` (see `.env.example`). The default setup uses SQLite via Prisma and optionally OIDC for authentication.
+Environment variables belong in `.env` (see `.env.example`). The default setup uses SQLite via Prisma, optionally OIDC for authentication, writes generated invoices to the directory specified by `FILES_DIR` (defaults to `./.cache/invoices`), and lets you tune log verbosity via `LOG_LEVEL`.
 
 ## Deployment
 

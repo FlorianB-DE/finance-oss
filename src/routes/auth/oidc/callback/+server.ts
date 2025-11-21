@@ -2,6 +2,9 @@ import { redirect } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { handleOidcCallback } from '$lib/server/oidc';
 import { SESSION_COOKIE, getSessionCookieAttributes } from '$lib/server/auth';
+import { createLogger } from '$lib/server/logger';
+
+const log = createLogger({ route: 'oidc-callback' });
 
 export const GET: RequestHandler = async ({ url, cookies }) => {
 	const error = url.searchParams.get('error');
@@ -30,7 +33,7 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 		cookies.set(SESSION_COOKIE, session.id, getSessionCookieAttributes(session.expiresAt));
 		throw redirect(303, nextUrl);
 	} catch (error) {
-		console.error('OIDC callback error:', error);
+		log.error({ err: error }, 'OIDC callback error');
 		const errorMessage = error instanceof Error ? error.message : 'unknown_error';
 		throw redirect(303, `/login?error=${encodeURIComponent(errorMessage)}`);
 	}

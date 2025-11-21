@@ -12,8 +12,11 @@ import {
 	type InvoiceWithRelations,
 	type RenderInvoice
 } from '$lib/server/invoice-format';
+import { getInvoiceOutputDir, toStoredInvoicePath } from '$lib/server/invoice-storage';
+import { createLogger } from '$lib/server/logger';
 
-const OUTPUT_DIR = path.resolve('static/invoices');
+const OUTPUT_DIR = getInvoiceOutputDir();
+const log = createLogger({ module: 'zugferd' });
 
 type ZugferdInvoiceData = {
 	id: string;
@@ -90,9 +93,14 @@ export async function generateZugferdArtifacts(invoiceId: number) {
 	await writeFile(pdfFilePath, pdfWithEmbeddedXml);
 	await writeFile(xmlFilePath, xmlBuffer);
 
+	log.info(
+		{ invoiceNumber: invoice.number, folder, pdf: pdfFilePath, xml: xmlFilePath },
+		'Generated ZUGFeRD artifacts'
+	);
+
 	return {
-		pdfPath: path.relative('static', pdfFilePath),
-		xmlPath: path.relative('static', xmlFilePath),
+		pdfPath: toStoredInvoicePath(pdfFilePath),
+		xmlPath: toStoredInvoicePath(xmlFilePath),
 		texPath: null
 	};
 }

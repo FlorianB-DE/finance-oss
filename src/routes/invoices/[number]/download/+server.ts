@@ -1,7 +1,10 @@
 import type { RequestHandler } from './$types';
 import { prisma } from '$lib/server/prisma';
 import { readFile } from 'node:fs/promises';
-import path from 'node:path';
+import { resolveInvoiceFile } from '$lib/server/invoice-storage';
+import { createLogger } from '$lib/server/logger';
+
+const log = createLogger({ route: 'invoice-download' });
 
 export const GET: RequestHandler = async ({ params }) => {
 	const invoice = await prisma.invoice.findUnique({
@@ -9,15 +12,29 @@ export const GET: RequestHandler = async ({ params }) => {
 	});
 
 	if (!invoice?.pdfPath) {
+		log.warn({ invoiceNumber: params.number }, 'Invoice or PDF path missing');
 		return new Response('Nicht gefunden', { status: 404 });
 	}
 
-	const file = await readFile(path.resolve('static', invoice.pdfPath));
+	const resolvedPath = resolveInvoiceFile(invoice.pdfPath);
+	if (!resolvedPath) {
+		log.error({ invoiceNumber: params.number }, 'Failed to resolve invoice PDF path');
+		return new Response('Nicht gefunden', { status: 404 });
+	}
 
-	return new Response(file, {
-		headers: {
-			'Content-Type': 'application/pdf',
-			'Content-Disposition': `attachment; filename="Rechnung-${invoice.number}.pdf"`
-		}
-	});
+	try {
+		const file = await readFile(resolvedPath);
+
+		log.info({ invoiceNumber: invoice.number, path: resolvedPath }, 'Serving invoice download');
+
+		return new Response(file, {
+			headers: {
+				'Content-Type': 'application/pdf',
+				'Content-Disposition': `attachment; filename="Rechnung-${invoice.number}.pdf"`
+			}
+		});
+	} catch (err) {
+		log.error({ err, invoiceNumber: params.number, path: resolvedPath }, 'Failed to read invoice PDF');
+		return new Response('Fehler beim Laden der Rechnung', { status: 500 });
+	}
 };
