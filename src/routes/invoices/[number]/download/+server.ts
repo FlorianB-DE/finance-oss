@@ -34,7 +34,10 @@ export const GET: RequestHandler = async ({ params }) => {
 			}
 		});
 	} catch (err) {
-		log.error({ err, invoiceNumber: params.number, path: resolvedPath }, 'Failed to read invoice PDF');
+		log.error(
+			{ err, invoiceNumber: params.number, path: resolvedPath },
+			'Failed to read invoice PDF'
+		);
 		return new Response('Fehler beim Laden der Rechnung', { status: 500 });
 	}
 };
