@@ -11,10 +11,45 @@
   bun = pkgs.bun;
   version = "2025-11-21_14-47-12";
 
-  finances-app = pkgs.fetchzip {
+  finances-tarball = pkgs.fetchzip {
     url = "https://github.com/florianb-de/finance-oss/releases/download/${version}/finances-build.tar.gz";
     hash = "sha256-29dhHLO3h62mqr+OX0Q2R9kBntj5YfrmcpOh1Z1OtfQ=";
     stripRoot = false;
+  };
+
+  # Create a derivation that sets up the application structure
+  # This extracts everything and sets up Prisma runtime in the Nix store
+  finances-app = pkgs.stdenv.mkDerivation {
+    name = "finances-app-${version}";
+    src = finances-tarball;
+
+    # fetchzip already unpacks, so we work directly from $src
+    dontUnpack = true;
+
+    # Install phase: set up the final structure
+    installPhase = ''
+      mkdir -p $out
+      
+      # Copy build output
+      cp -r $src/build $out/
+      
+      # Copy prisma schema
+      cp -r $src/prisma $out/
+      
+      # Copy package.json and bun.lock (for reference, not needed at runtime)
+      cp $src/package.json $out/
+      cp $src/bun.lock $out/ 2>/dev/null || true
+      
+      # Copy Prisma runtime (needed due to https://github.com/prisma/prisma/issues/28471)
+      # The generated client requires @prisma/client/runtime but it's not bundled by default
+      if [ -d $src/node_modules/@prisma/client/runtime ]; then
+        mkdir -p $out/node_modules/@prisma/client
+        cp -r $src/node_modules/@prisma/client/runtime $out/node_modules/@prisma/client/
+      fi
+    '';
+
+    # Don't fixup to avoid issues with node_modules
+    dontFixup = true;
   };
 
 in {
@@ -74,20 +109,6 @@ in {
     };
 
     # -------------------------
-    #      PREPARE DIRS
-    # -------------------------
-    preStart = ''
-      # Copy from Nix store to writable location
-      rsync -a --delete ${finances-app}/build/ /var/lib/finances/server/
-      rsync -a --delete ${finances-app}/prisma/ /var/lib/finances/prisma/
-
-      # Install @prisma/client (needed for TypeScript types and client code)
-      # Prisma engines come from system packages via environment variables
-      cd /var/lib/private/finances/server
-      ${bun}/bin/bun install --frozen-lockfile --production --no-save @prisma/client
-    '';
-
-    # -------------------------
     #      SYSTEMD CONFIG
     # -------------------------
     serviceConfig = {
@@ -95,18 +116,15 @@ in {
       Restart = "on-failure";
 
       # NixOS-managed writable directories
-      StateDirectory  = [ "finances" "finances/server" ];     # /var/lib/finances, /var/lib/finances/server
+      StateDirectory  = "finances";       # /var/lib/finances
       CacheDirectory  = "finances";       # /var/cache/finances
-
-      # where server actually runs
-      WorkingDirectory = "/var/lib/finances/server";
 
       # Prisma migrations (use system Prisma CLI)
       ExecStartPre = [
-        "${pkgs.prisma}/bin/prisma migrate deploy --schema /var/lib/finances/prisma/schema.prisma"
+        "${pkgs.prisma}/bin/prisma migrate deploy --schema ${finances-app}/prisma/schema.prisma"
       ];
 
-      ExecStart = "${bun}/bin/bun /var/lib/finances/server/index.js";
+      ExecStart = "${bun}/bin/bun ${finances-app}/build/index.js";
 
       DynamicUser = true;
     };

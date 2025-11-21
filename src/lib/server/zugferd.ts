@@ -2,7 +2,7 @@ import path from 'node:path';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { format, differenceInDays } from 'date-fns';
 import ZUGFeRDGenerator from 'zugferd-generator';
-import type { Settings } from '$lib/server/prisma/client';
+import type { Settings } from '@prisma/client';
 
 import { prisma } from '$lib/server/prisma';
 import { getOrCreateSettings } from '$lib/server/settings';

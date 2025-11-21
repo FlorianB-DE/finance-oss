@@ -1,4 +1,4 @@
-import type { Settings } from '$lib/server/prisma/client';
+import type { Settings } from '@prisma/client';
 import path from 'node:path';
 import puppeteer from 'puppeteer';
 import { render as renderComponent } from 'svelte/server';

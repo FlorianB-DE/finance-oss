@@ -48,7 +48,8 @@ jobs:
 
       - name: Archive build output
         run: |
-          tar -czf finances-build.tar.gz build prisma package.json bun.lock
+          # Include Prisma runtime to fix the bundling issue (see https://github.com/prisma/prisma/issues/28471)
+          tar -czf finances-build.tar.gz build prisma package.json bun.lock node_modules/@prisma/client/runtime
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
