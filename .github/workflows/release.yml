@@ -46,10 +46,16 @@ jobs:
       - name: Build
         run: bun run build
 
+      - name: Install production dependencies into build
+        run: |
+          cp package.json bun.lock build/
+          cd build
+          bun install --production --frozen-lockfile
+
       - name: Archive build output
         run: |
-          # Include Prisma runtime to fix the bundling issue (see https://github.com/prisma/prisma/issues/28471)
-          tar -czf finances-build.tar.gz build prisma package.json bun.lock node_modules/@prisma/client/runtime
+          # Include entire build directory with node_modules and prisma schema
+          tar -czf finances-build.tar.gz build prisma
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

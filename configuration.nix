@@ -40,11 +40,9 @@
       cp $src/package.json $out/
       cp $src/bun.lock $out/ 2>/dev/null || true
       
-      # Copy Prisma runtime (needed due to https://github.com/prisma/prisma/issues/28471)
-      # The generated client requires @prisma/client/runtime but it's not bundled by default
-      if [ -d $src/node_modules/@prisma/client/runtime ]; then
-        mkdir -p $out/node_modules/@prisma/client
-        cp -r $src/node_modules/@prisma/client/runtime $out/node_modules/@prisma/client/
+      if [ -d $src/node_module ]; then
+        mkdir -p $out/node_modules
+        cp -r $src/node_modules
       fi
     '';
 
