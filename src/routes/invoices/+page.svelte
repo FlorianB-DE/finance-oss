@@ -297,12 +297,12 @@
 								>
 									<input type="hidden" name="invoiceId" value={invoice.id} />
 									<button
-										class="rounded-full border border-gray-200 px-3 py-1 text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+										class="flex items-center gap-1.5 rounded-full border border-gray-200 px-3 py-1 text-gray-600 disabled:cursor-not-allowed disabled:opacity-50"
 										disabled={regeneratingInvoiceId === invoice.id}
 									>
 										{#if regeneratingInvoiceId === invoice.id}
 											<svg
-												class="animate-spin h-3 w-3"
+												class="h-3 w-3 animate-spin"
 												xmlns="http://www.w3.org/2000/svg"
 												fill="none"
 												viewBox="0 0 24 24"

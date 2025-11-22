@@ -16,14 +16,14 @@
 		settings.companyName ?? settings.personName ?? '',
 		settings.street,
 		[settings.postalCode, settings.city].filter(Boolean).join(' '),
-		settings.country,
+		settings.country
 	].filter(line => (line ?? '').toString().trim().length > 0);
 
 	const recipientLines = [
 		invoice.recipient.company,
 		invoice.recipient.street,
 		[invoice.recipient.postalCode, invoice.recipient.city].filter(Boolean).join(' '),
-		invoice.recipient.country,
+		invoice.recipient.country
 	].filter(line => (line ?? '').toString().trim().length > 0);
 
 	const paymentLines = [
@@ -39,7 +39,7 @@
 </script>
 
 <div
-	class="bg-surface p-[20px_24px] font-sans text-[13px] leading-[1.45] text-[#1f2a44] flex flex-col min-h-screen"
+	class="flex min-h-screen flex-col bg-surface p-[20px_24px] font-sans text-[13px] leading-[1.45] text-[#1f2a44]"
 	data-section="invoice"
 >
 	<header class="flex items-start justify-between border-b-2 border-[#c8d6f1] pb-3">
@@ -222,26 +222,29 @@
 			</section>
 		{/if}
 
-		<footer class="mt-4 border-t border-[#e2e8f0] pt-3 text-[11px] text-[#6b7a99]" data-section="footer">
-		<div class="flex flex-wrap justify-between gap-x-4 gap-y-1">
-			{#if settings.companyName || settings.personName}
-				<span data-footer="company-name">
-					{settings.companyName ?? settings.personName}
-					{#if settings.legalStatus}
-						<span class="text-[#94a3b8]"> • {settings.legalStatus}</span>
-					{/if}
-				</span>
-			{/if}
-			{#if settings.taxNumber}
-				<span data-footer="tax-number">Steuernummer: {settings.taxNumber}</span>
-			{/if}
-			{#if settings.wirtschaftsIdentNr}
-				<span data-footer="wirtschafts-id">Wirtschafts-ID: {settings.wirtschaftsIdentNr}</span>
-			{/if}
-			{#if settings.vatId}
-				<span data-footer="vat-id">Umsatzsteuer-ID: {settings.vatId}</span>
-			{/if}
-		</div>
-	</footer>
+		<footer
+			class="mt-4 border-t border-[#e2e8f0] pt-3 text-[11px] text-[#6b7a99]"
+			data-section="footer"
+		>
+			<div class="flex flex-wrap justify-between gap-x-4 gap-y-1">
+				{#if settings.companyName || settings.personName}
+					<span data-footer="company-name">
+						{settings.companyName ?? settings.personName}
+						{#if settings.legalStatus}
+							<span class="text-[#94a3b8]"> • {settings.legalStatus}</span>
+						{/if}
+					</span>
+				{/if}
+				{#if settings.taxNumber}
+					<span data-footer="tax-number">Steuernummer: {settings.taxNumber}</span>
+				{/if}
+				{#if settings.wirtschaftsIdentNr}
+					<span data-footer="wirtschafts-id">Wirtschafts-ID: {settings.wirtschaftsIdentNr}</span>
+				{/if}
+				{#if settings.vatId}
+					<span data-footer="vat-id">Umsatzsteuer-ID: {settings.vatId}</span>
+				{/if}
+			</div>
+		</footer>
 	</div>
 </div>

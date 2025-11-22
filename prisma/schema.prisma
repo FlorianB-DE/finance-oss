@@ -1,6 +1,6 @@
 generator client {
-  provider      = "prisma-client"
-  output        = "../src/lib/server/prisma"
+  provider = "prisma-client"
+  output   = "../src/lib/server/prisma"
 }
 
 datasource db {
@@ -19,12 +19,12 @@ model User {
   id           Int       @id @default(autoincrement())
   email        String    @unique
   passwordHash String?
-  oidcProvider String?  // e.g., "google", "keycloak", "auth0"
-  oidcSub      String?  // OIDC subject identifier
+  oidcProvider String? // e.g., "google", "keycloak", "auth0"
+  oidcSub      String? // OIDC subject identifier
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   sessions     Session[]
-  
+
   @@unique([oidcProvider, oidcSub])
 }
 
@@ -59,32 +59,33 @@ model Settings {
   emailSignature     String?
   lastInvoiceCounter Int      @default(0)
   invoicePrefix      String?
+  startingBalance    Decimal  @default(0)
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 }
 
 model Recipient {
-  id          Int       @id @default(autoincrement())
-  name        String
-  company     String?
-  email       String?
-  street      String?
-  postalCode  String?
-  city        String?
-  country     String?
-  createdAt   DateTime  @default(now())
-  invoices    Invoice[]
+  id         Int       @id @default(autoincrement())
+  name       String
+  company    String?
+  email      String?
+  street     String?
+  postalCode String?
+  city       String?
+  country    String?
+  createdAt  DateTime  @default(now())
+  invoices   Invoice[]
 }
 
 model Invoice {
-  id          Int            @id @default(autoincrement())
-  number      String         @unique
-  issueDate   DateTime       @default(now())
+  id          Int               @id @default(autoincrement())
+  number      String            @unique
+  issueDate   DateTime          @default(now())
   dueDate     DateTime
-  currency    String         @default("EUR")
-  recipient   Recipient      @relation(fields: [recipientId], references: [id])
+  currency    String            @default("EUR")
+  recipient   Recipient         @relation(fields: [recipientId], references: [id])
   recipientId Int
-  status      InvoiceStatus  @default(DRAFT)
+  status      InvoiceStatus     @default(DRAFT)
   notes       String?
   totalNet    Decimal
   totalTax    Decimal
@@ -92,8 +93,8 @@ model Invoice {
   pdfPath     String?
   xmlPath     String?
   texPath     String?
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
   lineItems   InvoiceLineItem[]
 }
 
@@ -109,3 +110,23 @@ model InvoiceLineItem {
   createdAt   DateTime @default(now())
 }
 
+model MonthlyExpense {
+  id              Int      @id @default(autoincrement())
+  name            String
+  amount          Decimal
+  dayOfMonth      Int // Day of month when expense occurs (1-31)
+  firstOccurrence DateTime @default(now()) // First date when this expense should occur
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model SingleExpense {
+  id        Int      @id @default(autoincrement())
+  name      String
+  amount    Decimal
+  date      DateTime // Specific date when expense occurs
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

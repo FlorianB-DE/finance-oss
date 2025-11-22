@@ -9,6 +9,7 @@
 	const navigation = [
 		{ href: '/', label: 'Übersicht' },
 		{ href: '/invoices', label: 'Rechnungen' },
+		{ href: '/planner', label: 'Planer' },
 		{ href: '/recipients', label: 'Empfänger' },
 		{ href: '/settings', label: 'Einstellungen' }
 	] as const;

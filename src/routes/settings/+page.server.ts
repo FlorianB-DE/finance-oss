@@ -34,7 +34,8 @@ export const load: PageServerLoad = async () => {
 	// Convert Prisma Decimal to number for serialization
 	const serializableSettings = {
 		...settings,
-		defaultTaxRate: settings.defaultTaxRate ? Number(settings.defaultTaxRate) : null
+		defaultTaxRate: settings.defaultTaxRate ? Number(settings.defaultTaxRate) : null,
+		startingBalance: settings.startingBalance ? Number(settings.startingBalance) : 0
 	};
 	return { settings: serializableSettings };
 };

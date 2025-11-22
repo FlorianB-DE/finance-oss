@@ -43,7 +43,8 @@ export const load: PageServerLoad = async () => {
 	const serializableSettings = settings
 		? {
 				...settings,
-				defaultTaxRate: settings.defaultTaxRate ? Number(settings.defaultTaxRate) : null
+				defaultTaxRate: settings.defaultTaxRate ? Number(settings.defaultTaxRate) : null,
+				startingBalance: settings.startingBalance ? Number(settings.startingBalance) : 0
 			}
 		: null;
 
