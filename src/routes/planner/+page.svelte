@@ -122,38 +122,6 @@
 		</p>
 	</section>
 
-	<!-- Starting Balance -->
-	<section class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-		<h2 class="mb-4 text-xl font-semibold text-gray-900">Startguthaben</h2>
-		<form
-			method="POST"
-			action="?/updateBalance"
-			use:enhance={handleSuccess}
-			class="flex items-end gap-4"
-		>
-			<div class="flex-1">
-				<label class="text-sm font-medium text-gray-700" for="starting-balance">
-					Aktuelles Guthaben
-				</label>
-				<input
-					id="starting-balance"
-					type="number"
-					step="0.01"
-					name="startingBalance"
-					value={data.startingBalance}
-					class="mt-1 w-full rounded-xl border border-gray-200 px-4 py-2"
-					placeholder="0.00"
-				/>
-			</div>
-			<button
-				type="submit"
-				class="rounded-full bg-primary px-6 py-2 text-base font-semibold text-white shadow hover:bg-primary-600"
-			>
-				Speichern
-			</button>
-		</form>
-	</section>
-
 	<!-- Add Expense Form -->
 	<section class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
 		<h2 class="mb-4 text-xl font-semibold text-gray-900">Monatliche Ausgabe hinzufügen</h2>
@@ -560,5 +528,37 @@
 			<!-- Forecast Table -->
 			<ForecastTable forecast={data.forecast} />
 		{/if}
+	</section>
+
+	<!-- Starting Balance -->
+	<section class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+		<h2 class="mb-4 text-xl font-semibold text-gray-900">Startguthaben</h2>
+		<form
+			method="POST"
+			action="?/updateBalance"
+			use:enhance={handleSuccess}
+			class="flex items-end gap-4"
+		>
+			<div class="flex-1">
+				<label class="text-sm font-medium text-gray-700" for="starting-balance">
+					Aktuelles Guthaben
+				</label>
+				<input
+					id="starting-balance"
+					type="number"
+					step="0.01"
+					name="startingBalance"
+					value={data.startingBalance}
+					class="mt-1 w-full rounded-xl border border-gray-200 px-4 py-2"
+					placeholder="0.00"
+				/>
+			</div>
+			<button
+				type="submit"
+				class="rounded-full bg-primary px-6 py-2 text-base font-semibold text-white shadow hover:bg-primary-600"
+			>
+				Speichern
+			</button>
+		</form>
 	</section>
 </div>
