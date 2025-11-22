@@ -76,8 +76,9 @@
 	const handleSuccess = () => {
 		return async ({ result }: { result: { type: string; data?: unknown } }) => {
 			if (result.type === 'success' && result.data) {
-				messageState = result.data as { success?: boolean; message?: string };
-				if (result.data.success) {
+				const data = result.data as { success?: boolean; message?: string };
+				messageState = data;
+				if (data.success) {
 					await invalidateAll();
 					setTimeout(() => {
 						messageState = null;

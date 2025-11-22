@@ -74,7 +74,11 @@ export async function updateExpense(
 		dayOfMonth?: number;
 		firstOccurrence?: Date;
 		active?: boolean;
-	} = { ...data };
+	} = {};
+	if (data.name !== undefined) updateData.name = data.name;
+	if (data.amount !== undefined) updateData.amount = data.amount;
+	if (data.dayOfMonth !== undefined) updateData.dayOfMonth = data.dayOfMonth;
+	if (data.active !== undefined) updateData.active = data.active;
 	if (data.firstOccurrence !== undefined) {
 		updateData.firstOccurrence =
 			typeof data.firstOccurrence === 'string'

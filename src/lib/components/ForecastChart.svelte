@@ -311,35 +311,40 @@
 					mode: 'nearest' as const,
 					intersect: true,
 					callbacks: {
-						title: function (context: Array<{ raw?: { x?: number } }>) {
-							if (context[0]?.raw?.x) {
-								return format(new Date(context[0].raw.x), 'dd.MM.yyyy');
+						title: function (this: never, tooltipItems: Array<{ raw?: unknown }>) {
+							const raw = tooltipItems[0]?.raw as { x?: number } | undefined;
+							if (raw?.x) {
+								return format(new Date(raw.x), 'dd.MM.yyyy');
 							}
 							return '';
 						},
-						label: function (context: {
-							dataset?: { label?: string };
-							raw?: {
-								transactions?: Array<{ description: string; amount: number }>;
-								totalAmount?: number;
-								amount?: number;
-								description?: string;
-							};
-							parsed?: { y: number | null };
-						}) {
-							let label = context.dataset.label || '';
+						label: function (
+							this: never,
+							context: {
+								dataset?: { label?: string };
+								raw?: unknown;
+								parsed?: { y: number | null };
+							}
+						) {
+							let label = context.dataset?.label || '';
 							if (label) {
 								label += ': ';
 							}
 
+							const raw = context.raw as
+								| {
+										transactions?: Array<{ description: string; amount: number }>;
+										totalAmount?: number;
+										amount?: number;
+										description?: string;
+								  }
+								| undefined;
+
 							// For transactions, show all transactions for this date
-							if (context.raw?.transactions !== undefined) {
+							if (raw?.transactions !== undefined) {
 								// Multiple transactions on the same date
-								const transactions = context.raw.transactions as Array<{
-									description: string;
-									amount: number;
-								}>;
-								const totalAmount = context.raw.totalAmount as number;
+								const transactions = raw.transactions;
+								const totalAmount = raw.totalAmount ?? 0;
 
 								if (transactions.length === 1) {
 									// Single transaction
@@ -354,21 +359,21 @@
 									});
 								}
 
-								if (context.parsed.y !== null) {
+								if (context.parsed?.y !== null && context.parsed?.y !== undefined) {
 									label += `\nKontostand: ${formatCurrency(context.parsed.y)}`;
 								}
-							} else if (context.raw?.amount !== undefined) {
+							} else if (raw?.amount !== undefined) {
 								// Legacy single transaction format (shouldn't happen with new code)
-								label += formatCurrency(context.raw.amount);
-								if (context.parsed.y !== null) {
+								label += formatCurrency(raw.amount);
+								if (context.parsed?.y !== null && context.parsed?.y !== undefined) {
 									label += ` → Balance: ${formatCurrency(context.parsed.y)}`;
 								}
-								if (context.raw?.description) {
-									label += ` (${context.raw.description})`;
+								if (raw?.description) {
+									label += ` (${raw.description})`;
 								}
 							} else {
 								// For balance line, just show the balance
-								if (context.parsed.y !== null) {
+								if (context.parsed?.y !== null && context.parsed?.y !== undefined) {
 									label += formatCurrency(context.parsed.y);
 								}
 							}
@@ -445,45 +450,35 @@
 			id: 'countBadge',
 			afterDatasetsDraw: (chart: Chart) => {
 				const ctx = chart.ctx;
-				chart.data.datasets.forEach(
-					(
-						dataset: {
-							label?: string;
-							borderColor?: string;
-							backgroundColor?: string;
-							data?: Array<{ count?: number }>;
-						},
-						datasetIndex: number
-					) => {
-						// Only draw badges for income and expense datasets
-						if (dataset.label !== 'Einnahmen' && dataset.label !== 'Ausgaben') {
-							return;
-						}
-
-						const meta = chart.getDatasetMeta(datasetIndex);
-						if (!meta.data) return;
-
-						meta.data.forEach((point: { x: number; y: number }, index: number) => {
-							const rawData = dataset.data[index];
-							// Only draw count if there are multiple transactions
-							if (rawData?.count && rawData.count > 1) {
-								// Get the exact center coordinates of the point
-								const x = point.x;
-								const y = point.y;
-								const count = rawData.count.toString();
-
-								// Draw small gray count number inside the dot
-								ctx.save();
-								ctx.fillStyle = '#6b7280'; // Gray color
-								ctx.font = '7px sans-serif'; // Very small font
-								ctx.textAlign = 'center';
-								ctx.textBaseline = 'middle';
-								ctx.fillText(count, x, y);
-								ctx.restore();
-							}
-						});
+				chart.data.datasets.forEach((dataset, datasetIndex: number) => {
+					// Only draw badges for income and expense datasets
+					if (dataset.label !== 'Einnahmen' && dataset.label !== 'Ausgaben') {
+						return;
 					}
-				);
+
+					const meta = chart.getDatasetMeta(datasetIndex);
+					if (!meta.data) return;
+
+					meta.data.forEach((point: { x: number; y: number }, index: number) => {
+						const rawData = dataset.data?.[index] as { count?: number } | undefined;
+						// Only draw count if there are multiple transactions
+						if (rawData?.count && rawData.count > 1) {
+							// Get the exact center coordinates of the point
+							const x = point.x;
+							const y = point.y;
+							const count = rawData.count.toString();
+
+							// Draw small gray count number inside the dot
+							ctx.save();
+							ctx.fillStyle = '#6b7280'; // Gray color
+							ctx.font = '7px sans-serif'; // Very small font
+							ctx.textAlign = 'center';
+							ctx.textBaseline = 'middle';
+							ctx.fillText(count, x, y);
+							ctx.restore();
+						}
+					});
+				});
 			}
 		};
 
