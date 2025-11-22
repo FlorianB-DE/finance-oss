@@ -31,11 +31,14 @@ export async function createExpense(data: { name: string; amount: number; dayOfM
 	const daysInCurrentMonth = getDaysInMonth(currentMonth);
 	const actualDay = Math.min(data.dayOfMonth, daysInCurrentMonth);
 	const thisMonthOccurrence = setDate(currentMonth, actualDay);
-	
+
 	let firstOccurrence: Date;
 	if (thisMonthOccurrence < now) {
 		// Day has passed this month, use next month
-		firstOccurrence = setDate(addMonths(currentMonth, 1), Math.min(data.dayOfMonth, getDaysInMonth(addMonths(currentMonth, 1))));
+		firstOccurrence = setDate(
+			addMonths(currentMonth, 1),
+			Math.min(data.dayOfMonth, getDaysInMonth(addMonths(currentMonth, 1)))
+		);
 	} else {
 		// Day hasn't passed yet this month, use this month
 		firstOccurrence = thisMonthOccurrence;
@@ -67,9 +70,10 @@ export async function updateExpense(
 
 	const updateData: any = { ...data };
 	if (data.firstOccurrence !== undefined) {
-		updateData.firstOccurrence = typeof data.firstOccurrence === 'string' 
-			? new Date(data.firstOccurrence) 
-			: data.firstOccurrence;
+		updateData.firstOccurrence =
+			typeof data.firstOccurrence === 'string'
+				? new Date(data.firstOccurrence)
+				: data.firstOccurrence;
 	}
 
 	return prisma.monthlyExpense.update({

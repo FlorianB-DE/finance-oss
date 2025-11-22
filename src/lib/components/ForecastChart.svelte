@@ -88,7 +88,7 @@
 		// Build balance line by processing each transaction
 		// Track balance after each transaction for dot positioning
 		const transactionBalanceMap = new Map<number, number>();
-		
+
 		allTransactions.forEach(transaction => {
 			// Apply transaction to running balance
 			if (transaction.type === 'income') {
@@ -160,12 +160,14 @@
 			y: number;
 			transactions: Array<{ description: string; amount: number }>;
 			totalAmount: number;
+			count: number;
 		}> = [];
 		const expenseTransactions: Array<{
 			x: number;
 			y: number;
 			transactions: Array<{ description: string; amount: number }>;
 			totalAmount: number;
+			count: number;
 		}> = [];
 
 		transactionsByDate.forEach((transactions, date) => {

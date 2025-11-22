@@ -5,7 +5,16 @@ import { generateForecast } from '$lib/server/expenses';
 import { isBefore, subMonths, startOfMonth, getDaysInMonth, setDate } from 'date-fns';
 
 export const load: PageServerLoad = async () => {
-	const [settings, stats, invoices, paidInvoices, sentInvoices, draftInvoices, singleExpenses, monthlyExpenses] = await Promise.all([
+	const [
+		settings,
+		stats,
+		invoices,
+		paidInvoices,
+		sentInvoices,
+		draftInvoices,
+		singleExpenses,
+		monthlyExpenses
+	] = await Promise.all([
 		getOrCreateSettings(),
 		prisma.invoice.aggregate({
 			_sum: { totalGross: true },
