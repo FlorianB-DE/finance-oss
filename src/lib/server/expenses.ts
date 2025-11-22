@@ -68,7 +68,13 @@ export async function updateExpense(
 		throw new Error('Tag des Monats muss zwischen 1 und 31 liegen');
 	}
 
-	const updateData: any = { ...data };
+	const updateData: {
+		name?: string;
+		amount?: number;
+		dayOfMonth?: number;
+		firstOccurrence?: Date;
+		active?: boolean;
+	} = { ...data };
 	if (data.firstOccurrence !== undefined) {
 		updateData.firstOccurrence =
 			typeof data.firstOccurrence === 'string'

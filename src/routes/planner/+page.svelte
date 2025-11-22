@@ -74,7 +74,7 @@
 	};
 
 	const handleSuccess = () => {
-		return async ({ result }: { result: any }) => {
+		return async ({ result }: { result: { type: string; data?: unknown } }) => {
 			if (result.type === 'success' && result.data) {
 				messageState = result.data as { success?: boolean; message?: string };
 				if (result.data.success) {

@@ -26,7 +26,7 @@
 
 	// Chart.js instance
 	let chartCanvas: HTMLCanvasElement | null = $state(null);
-	let chartInstance: any = $state(null);
+	let chartInstance: Chart | null = $state(null);
 
 	const formatCurrency = (value: number) =>
 		new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(value);
@@ -42,8 +42,8 @@
 
 		// Start from today (current date/time) - the starting balance is the balance RIGHT NOW
 		const today = new Date();
-		today.setHours(0, 0, 0, 0);
-		const todayTime = today.getTime();
+		const todayNormalized = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+		const todayTime = todayNormalized.getTime();
 
 		// Build balance progression through all transactions
 		// Start with current balance (starting balance is the balance RIGHT NOW)
@@ -67,8 +67,12 @@
 			entry.transactions.forEach(transaction => {
 				// Normalize transaction date to midnight for consistent comparison
 				const transactionDateObj = new Date(transaction.date);
-				transactionDateObj.setHours(0, 0, 0, 0);
-				const transactionDate = transactionDateObj.getTime();
+				const transactionDateNormalized = new Date(
+					transactionDateObj.getFullYear(),
+					transactionDateObj.getMonth(),
+					transactionDateObj.getDate()
+				);
+				const transactionDate = transactionDateNormalized.getTime();
 				// Only include transactions from today onwards (future transactions)
 				// Note: We use >= to include transactions happening today
 				if (transactionDate >= todayTime) {
@@ -87,6 +91,7 @@
 
 		// Build balance line by processing each transaction
 		// Track balance after each transaction for dot positioning
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity
 		const transactionBalanceMap = new Map<number, number>();
 
 		allTransactions.forEach(transaction => {
@@ -112,6 +117,7 @@
 
 		// Remove duplicate points at the same date (keep the last one which has the correct balance)
 		const finalBalanceData: Array<{ x: number; y: number }> = [];
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity
 		const seenDates = new Set<number>();
 
 		// Process in reverse to keep the last balance for each date
@@ -136,6 +142,7 @@
 
 		// Group transactions by date and combine them
 		// This prevents overlapping dots and allows showing all transactions in tooltip
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity
 		const transactionsByDate = new Map<
 			number,
 			Array<{ type: 'income' | 'expense'; description: string; amount: number }>
@@ -270,7 +277,7 @@
 		const balanceDataset = data.datasets.find(d => d.label === 'Kontostand');
 		const balanceValues: number[] = [];
 		if (balanceDataset && Array.isArray(balanceDataset.data)) {
-			balanceDataset.data.forEach((point: any) => {
+			balanceDataset.data.forEach((point: { x?: number; y?: number }) => {
 				if (point.y !== undefined && !isNaN(point.y)) {
 					balanceValues.push(point.y);
 				}
@@ -304,13 +311,22 @@
 					mode: 'nearest' as const,
 					intersect: true,
 					callbacks: {
-						title: function (context: any) {
+						title: function (context: Array<{ raw?: { x?: number } }>) {
 							if (context[0]?.raw?.x) {
 								return format(new Date(context[0].raw.x), 'dd.MM.yyyy');
 							}
 							return '';
 						},
-						label: function (context: any) {
+						label: function (context: {
+							dataset?: { label?: string };
+							raw?: {
+								transactions?: Array<{ description: string; amount: number }>;
+								totalAmount?: number;
+								amount?: number;
+								description?: string;
+							};
+							parsed?: { y: number | null };
+						}) {
 							let label = context.dataset.label || '';
 							if (label) {
 								label += ': ';
@@ -400,8 +416,8 @@
 						color: 'rgba(229, 231, 235, 0.5)'
 					},
 					ticks: {
-						callback: function (value: any) {
-							return formatCurrency(value);
+						callback: function (value: number | string) {
+							return formatCurrency(typeof value === 'number' ? value : parseFloat(value));
 						}
 					},
 					beginAtZero: false,
@@ -427,37 +443,47 @@
 		// Register custom count badge plugin
 		const countBadgePlugin = {
 			id: 'countBadge',
-			afterDatasetsDraw: (chart: any) => {
+			afterDatasetsDraw: (chart: Chart) => {
 				const ctx = chart.ctx;
-				chart.data.datasets.forEach((dataset: any, datasetIndex: number) => {
-					// Only draw badges for income and expense datasets
-					if (dataset.label !== 'Einnahmen' && dataset.label !== 'Ausgaben') {
-						return;
-					}
-
-					const meta = chart.getDatasetMeta(datasetIndex);
-					if (!meta.data) return;
-
-					meta.data.forEach((point: any, index: number) => {
-						const rawData = dataset.data[index];
-						// Only draw count if there are multiple transactions
-						if (rawData?.count && rawData.count > 1) {
-							// Get the exact center coordinates of the point
-							const x = point.x;
-							const y = point.y;
-							const count = rawData.count.toString();
-
-							// Draw small gray count number inside the dot
-							ctx.save();
-							ctx.fillStyle = '#6b7280'; // Gray color
-							ctx.font = '7px sans-serif'; // Very small font
-							ctx.textAlign = 'center';
-							ctx.textBaseline = 'middle';
-							ctx.fillText(count, x, y);
-							ctx.restore();
+				chart.data.datasets.forEach(
+					(
+						dataset: {
+							label?: string;
+							borderColor?: string;
+							backgroundColor?: string;
+							data?: Array<{ count?: number }>;
+						},
+						datasetIndex: number
+					) => {
+						// Only draw badges for income and expense datasets
+						if (dataset.label !== 'Einnahmen' && dataset.label !== 'Ausgaben') {
+							return;
 						}
-					});
-				});
+
+						const meta = chart.getDatasetMeta(datasetIndex);
+						if (!meta.data) return;
+
+						meta.data.forEach((point: { x: number; y: number }, index: number) => {
+							const rawData = dataset.data[index];
+							// Only draw count if there are multiple transactions
+							if (rawData?.count && rawData.count > 1) {
+								// Get the exact center coordinates of the point
+								const x = point.x;
+								const y = point.y;
+								const count = rawData.count.toString();
+
+								// Draw small gray count number inside the dot
+								ctx.save();
+								ctx.fillStyle = '#6b7280'; // Gray color
+								ctx.font = '7px sans-serif'; // Very small font
+								ctx.textAlign = 'center';
+								ctx.textBaseline = 'middle';
+								ctx.fillText(count, x, y);
+								ctx.restore();
+							}
+						});
+					}
+				);
 			}
 		};
 
