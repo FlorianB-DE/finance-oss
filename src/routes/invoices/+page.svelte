@@ -142,9 +142,9 @@
 			<div class="space-y-4">
 				{#each items as item, index (index)}
 					<div
-						class="grid gap-3 rounded-2xl border border-gray-100 p-4 md:grid-cols-[2fr,repeat(3,1fr),auto]"
+						class="grid gap-3 rounded-2xl border border-gray-100 p-4 sm:grid-cols-2 md:grid-cols-[2fr,repeat(3,1fr),auto]"
 					>
-						<div class="md:col-span-1">
+						<div class="sm:col-span-2 md:col-span-1">
 							<label class="text-xs font-medium text-gray-500" for={`item-${index}-desc`}>
 								Beschreibung
 							</label>
@@ -196,7 +196,7 @@
 						</div>
 						<button
 							type="button"
-							class="self-end rounded-full border border-gray-200 px-3 py-2 text-xs text-gray-500 hover:text-gray-900"
+							class="self-end rounded-full border border-gray-200 px-3 py-2 text-xs text-gray-500 hover:text-gray-900 sm:col-span-2 md:col-span-1"
 							onclick={() => removeItem(index)}
 						>
 							Entfernen
@@ -222,7 +222,7 @@
 				></textarea>
 			</div>
 
-			<div class="flex items-center justify-between rounded-2xl bg-gray-50 p-4">
+			<div class="flex flex-col gap-4 rounded-2xl bg-gray-50 p-4 sm:flex-row sm:items-center sm:justify-between">
 				<div>
 					<p class="text-sm text-gray-500">Gesamt</p>
 					<p class="text-2xl font-semibold text-gray-900">{formatCurrency(totals().gross)}</p>
@@ -231,7 +231,7 @@
 					</p>
 				</div>
 				<button
-					class="rounded-full bg-primary px-6 py-3 text-base font-semibold text-white shadow hover:bg-primary-600"
+					class="w-full rounded-full bg-primary px-6 py-3 text-base font-semibold text-white shadow hover:bg-primary-600 sm:w-auto"
 				>
 					Rechnung erzeugen
 				</button>

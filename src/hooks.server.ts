@@ -4,7 +4,7 @@ import { redirect } from '@sveltejs/kit';
 import { createLogger } from '$lib/server/logger';
 
 const log = createLogger({ component: 'hooks' });
-const UNPROTECTED_PATHS = ['/login', '/api/public/health', '/auth/oidc'];
+const UNPROTECTED_PATHS = ['/login', '/api/public/health', '/auth/oidc', '/impressum', '/datenschutz'];
 
 export const handle: Handle = async ({ event, resolve }) => {
 	const token = event.cookies.get(SESSION_COOKIE);

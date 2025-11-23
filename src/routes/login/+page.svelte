@@ -122,5 +122,20 @@
 				Mit OIDC anmelden
 			</a>
 		{/if}
+
+		<div class="mt-8 pt-6 border-t border-gray-200">
+			<nav class="flex flex-wrap justify-center gap-4 text-xs text-gray-500">
+				<a
+					href={resolve('/impressum')}
+					class="hover:text-gray-900 transition"
+					>Impressum</a
+				>
+				<a
+					href={resolve('/datenschutz')}
+					class="hover:text-gray-900 transition"
+					>Datenschutzerklärung</a
+				>
+			</nav>
+		</div>
 	</div>
 </main>

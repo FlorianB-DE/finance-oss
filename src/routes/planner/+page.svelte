@@ -193,10 +193,11 @@
 							method="POST"
 							action="?/update"
 							use:enhance={handleSuccess}
-							class="grid gap-3 rounded-xl border-2 border-primary p-4 md:grid-cols-[2fr,1fr,1fr,auto,auto]"
+							class="grid gap-3 rounded-xl border-2 border-primary p-4 sm:grid-cols-2 md:grid-cols-[2fr,1fr,1fr,auto,auto]"
 						>
 							<input type="hidden" name="id" value={expense.id} />
-							<div>
+							<div class="sm:col-span-2 md:col-span-1">
+								<label class="mb-1 block text-xs font-medium text-gray-600">Name</label>
 								<input
 									type="text"
 									name="name"
@@ -206,6 +207,7 @@
 								/>
 							</div>
 							<div>
+								<label class="mb-1 block text-xs font-medium text-gray-600">Betrag (€)</label>
 								<input
 									type="number"
 									step="0.01"
@@ -217,6 +219,7 @@
 								/>
 							</div>
 							<div>
+								<label class="mb-1 block text-xs font-medium text-gray-600">Tag</label>
 								<input
 									type="number"
 									min="1"
@@ -227,7 +230,7 @@
 									class="w-full rounded-xl border border-gray-200 px-3 py-2"
 								/>
 							</div>
-							<div class="flex items-center gap-2">
+							<div class="flex items-center gap-2 sm:col-span-2 md:col-span-1">
 								<input
 									type="checkbox"
 									name="active"
@@ -236,17 +239,17 @@
 								/>
 								<span class="text-sm text-gray-600">Aktiv</span>
 							</div>
-							<div class="flex gap-2">
+							<div class="flex gap-2 sm:col-span-2 md:col-span-1">
 								<button
 									type="submit"
-									class="rounded-full bg-primary px-4 py-2 text-sm font-medium text-white"
+									class="flex-1 rounded-full bg-primary px-4 py-2 text-sm font-medium text-white sm:flex-none"
 								>
 									Speichern
 								</button>
 								<button
 									type="button"
 									onclick={cancelEdit}
-									class="rounded-full border border-gray-200 px-4 py-2 text-sm text-gray-600"
+									class="flex-1 rounded-full border border-gray-200 px-4 py-2 text-sm text-gray-600 sm:flex-none"
 								>
 									Abbrechen
 								</button>
@@ -254,22 +257,23 @@
 						</form>
 					{:else}
 						<div
-							class="grid items-center gap-3 rounded-xl border border-gray-100 p-4 md:grid-cols-[2fr,1fr,1fr,auto,auto] {expense.active
+							class="flex flex-col gap-3 rounded-xl border border-gray-100 p-4 sm:flex-row sm:items-center md:grid md:grid-cols-[2fr,1fr,1fr,auto,auto] {expense.active
 								? ''
 								: 'opacity-50'}"
 						>
-							<div>
+							<div class="flex-1">
 								<p class="font-semibold text-gray-900">{expense.name}</p>
 								<p class="text-xs text-gray-500">
 									{expense.active ? 'Aktiv' : 'Inaktiv'} · Tag {expense.dayOfMonth}
 								</p>
 							</div>
-							<div>
+							<div class="sm:hidden md:block">
+								<p class="text-xs text-gray-500">Betrag</p>
 								<p class="text-sm font-semibold text-gray-900">
 									{formatCurrency(expense.amount)}
 								</p>
 							</div>
-							<div>
+							<div class="hidden md:block">
 								<p class="text-sm text-gray-600">Tag {expense.dayOfMonth}</p>
 							</div>
 							<div>
@@ -283,7 +287,7 @@
 									</span>
 								{/if}
 							</div>
-							<div class="flex gap-2">
+							<div class="flex gap-2 sm:ml-auto md:ml-0">
 								<button
 									type="button"
 									onclick={() => startEdit(expense)}
@@ -310,6 +314,12 @@
 										Löschen
 									</button>
 								</form>
+							</div>
+							<!-- Mobile: Show amount below name -->
+							<div class="sm:hidden md:hidden">
+								<p class="text-sm font-semibold text-gray-900">
+									{formatCurrency(expense.amount)}
+								</p>
 							</div>
 						</div>
 					{/if}
@@ -385,10 +395,11 @@
 							method="POST"
 							action="?/updateSingle"
 							use:enhance={handleSuccess}
-							class="grid gap-3 rounded-xl border-2 border-primary p-4 md:grid-cols-[2fr,1fr,1fr,auto,auto]"
+							class="grid gap-3 rounded-xl border-2 border-primary p-4 sm:grid-cols-2 md:grid-cols-[2fr,1fr,1fr,auto,auto]"
 						>
 							<input type="hidden" name="id" value={expense.id} />
-							<div>
+							<div class="sm:col-span-2 md:col-span-1">
+								<label class="mb-1 block text-xs font-medium text-gray-600">Name</label>
 								<input
 									type="text"
 									name="name"
@@ -398,6 +409,7 @@
 								/>
 							</div>
 							<div>
+								<label class="mb-1 block text-xs font-medium text-gray-600">Betrag (€)</label>
 								<input
 									type="number"
 									step="0.01"
@@ -409,6 +421,7 @@
 								/>
 							</div>
 							<div>
+								<label class="mb-1 block text-xs font-medium text-gray-600">Datum</label>
 								<input
 									type="date"
 									name="date"
@@ -417,7 +430,7 @@
 									class="w-full rounded-xl border border-gray-200 px-3 py-2"
 								/>
 							</div>
-							<div class="flex items-center gap-2">
+							<div class="flex items-center gap-2 sm:col-span-2 md:col-span-1">
 								<input
 									type="checkbox"
 									name="active"
@@ -426,17 +439,17 @@
 								/>
 								<span class="text-sm text-gray-600">Aktiv</span>
 							</div>
-							<div class="flex gap-2">
+							<div class="flex gap-2 sm:col-span-2 md:col-span-1">
 								<button
 									type="submit"
-									class="rounded-full bg-primary px-4 py-2 text-sm font-medium text-white"
+									class="flex-1 rounded-full bg-primary px-4 py-2 text-sm font-medium text-white sm:flex-none"
 								>
 									Speichern
 								</button>
 								<button
 									type="button"
 									onclick={cancelEditSingle}
-									class="rounded-full border border-gray-200 px-4 py-2 text-sm text-gray-600"
+									class="flex-1 rounded-full border border-gray-200 px-4 py-2 text-sm text-gray-600 sm:flex-none"
 								>
 									Abbrechen
 								</button>
@@ -444,11 +457,11 @@
 						</form>
 					{:else}
 						<div
-							class="grid items-center gap-3 rounded-xl border border-gray-100 p-4 md:grid-cols-[2fr,1fr,1fr,auto,auto] {expense.active
+							class="flex flex-col gap-3 rounded-xl border border-gray-100 p-4 sm:flex-row sm:items-center md:grid md:grid-cols-[2fr,1fr,1fr,auto,auto] {expense.active
 								? ''
 								: 'opacity-50'}"
 						>
-							<div>
+							<div class="flex-1">
 								<p class="font-semibold text-gray-900">{expense.name}</p>
 								<p class="text-xs text-gray-500">
 									{expense.active ? 'Aktiv' : 'Inaktiv'} · {format(
@@ -457,12 +470,13 @@
 									)}
 								</p>
 							</div>
-							<div>
+							<div class="sm:hidden md:block">
+								<p class="text-xs text-gray-500">Betrag</p>
 								<p class="text-sm font-semibold text-gray-900">
 									{formatCurrency(expense.amount)}
 								</p>
 							</div>
-							<div>
+							<div class="hidden md:block">
 								<p class="text-sm text-gray-600">{format(new Date(expense.date), 'dd.MM.yyyy')}</p>
 							</div>
 							<div>
@@ -476,7 +490,7 @@
 									</span>
 								{/if}
 							</div>
-							<div class="flex gap-2">
+							<div class="flex gap-2 sm:ml-auto md:ml-0">
 								<button
 									type="button"
 									onclick={() => startEditSingle(expense)}
@@ -503,6 +517,12 @@
 										Löschen
 									</button>
 								</form>
+							</div>
+							<!-- Mobile: Show amount below name -->
+							<div class="sm:hidden md:hidden">
+								<p class="text-sm font-semibold text-gray-900">
+									{formatCurrency(expense.amount)}
+								</p>
 							</div>
 						</div>
 					{/if}
