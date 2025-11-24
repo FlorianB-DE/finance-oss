@@ -222,7 +222,9 @@
 				></textarea>
 			</div>
 
-			<div class="flex flex-col gap-4 rounded-2xl bg-gray-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+			<div
+				class="flex flex-col gap-4 rounded-2xl bg-gray-50 p-4 sm:flex-row sm:items-center sm:justify-between"
+			>
 				<div>
 					<p class="text-sm text-gray-500">Gesamt</p>
 					<p class="text-2xl font-semibold text-gray-900">{formatCurrency(totals().gross)}</p>

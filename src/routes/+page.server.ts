@@ -6,7 +6,9 @@ import { getLastSuccessfulLogin } from '$lib/server/login-attempts';
 import { isBefore, subMonths, startOfMonth, getDaysInMonth, setDate } from 'date-fns';
 
 export const load: PageServerLoad = async ({ locals }) => {
-	const lastLoginPromise = locals.user ? getLastSuccessfulLogin(locals.user.id) : Promise.resolve(null);
+	const lastLoginPromise = locals.user
+		? getLastSuccessfulLogin(locals.user.id)
+		: Promise.resolve(null);
 
 	const [
 		settings,

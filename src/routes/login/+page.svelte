@@ -123,16 +123,10 @@
 			</a>
 		{/if}
 
-		<div class="mt-8 pt-6 border-t border-gray-200">
+		<div class="mt-8 border-t border-gray-200 pt-6">
 			<nav class="flex flex-wrap justify-center gap-4 text-xs text-gray-500">
-				<a
-					href={resolve('/impressum')}
-					class="hover:text-gray-900 transition"
-					>Impressum</a
-				>
-				<a
-					href={resolve('/datenschutz')}
-					class="hover:text-gray-900 transition"
+				<a href={resolve('/impressum')} class="transition hover:text-gray-900">Impressum</a>
+				<a href={resolve('/datenschutz')} class="transition hover:text-gray-900"
 					>Datenschutzerklärung</a
 				>
 			</nav>

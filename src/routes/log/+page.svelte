@@ -28,7 +28,7 @@
 		{:else}
 			<div class="overflow-x-auto">
 				<table class="min-w-full divide-y divide-gray-100 text-sm">
-					<thead class="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
+					<thead class="bg-gray-50 text-left text-xs tracking-wide text-gray-500 uppercase">
 						<tr>
 							<th class="px-6 py-3">Zeitpunkt</th>
 							<th class="px-6 py-3">E-Mail</th>
@@ -38,9 +38,9 @@
 						</tr>
 					</thead>
 					<tbody class="divide-y divide-gray-50 bg-white">
-						{#each data.attempts as attempt}
+						{#each data.attempts as attempt (attempt.id)}
 							<tr class="hover:bg-gray-50">
-								<td class="whitespace-nowrap px-6 py-3 text-gray-900">
+								<td class="px-6 py-3 whitespace-nowrap text-gray-900">
 									{format(new Date(attempt.createdAt), "dd.MM.yyyy '·' HH:mm:ss")}
 								</td>
 								<td class="px-6 py-3">
@@ -56,15 +56,13 @@
 								<td class="px-6 py-3">
 									<span
 										class={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${
-											attempt.success
-												? 'bg-green-100 text-green-800'
-												: 'bg-red-100 text-red-800'
+											attempt.success ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
 										}`}
 									>
 										{attempt.success ? 'Erfolgreich' : 'Fehlgeschlagen'}
 									</span>
 								</td>
-								<td class="whitespace-nowrap px-6 py-3 text-gray-600">
+								<td class="px-6 py-3 whitespace-nowrap text-gray-600">
 									{attempt.ipAddress ?? '—'}
 								</td>
 								<td class="px-6 py-3 text-gray-600">
@@ -80,4 +78,3 @@
 		{/if}
 	</section>
 </div>
-

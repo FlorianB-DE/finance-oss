@@ -189,6 +189,9 @@
 			<div class="space-y-3">
 				{#each data.expenses as expense (expense.id)}
 					{#if editingId === expense.id}
+						{@const nameId = `expense-${expense.id}-name`}
+						{@const amountId = `expense-${expense.id}-amount`}
+						{@const dayId = `expense-${expense.id}-day`}
 						<form
 							method="POST"
 							action="?/update"
@@ -197,8 +200,10 @@
 						>
 							<input type="hidden" name="id" value={expense.id} />
 							<div class="sm:col-span-2 md:col-span-1">
-								<label class="mb-1 block text-xs font-medium text-gray-600">Name</label>
+								<label class="mb-1 block text-xs font-medium text-gray-600" for={nameId}>Name</label
+								>
 								<input
+									id={nameId}
 									type="text"
 									name="name"
 									required
@@ -207,8 +212,11 @@
 								/>
 							</div>
 							<div>
-								<label class="mb-1 block text-xs font-medium text-gray-600">Betrag (€)</label>
+								<label class="mb-1 block text-xs font-medium text-gray-600" for={amountId}
+									>Betrag (€)</label
+								>
 								<input
+									id={amountId}
 									type="number"
 									step="0.01"
 									min="0"
@@ -219,8 +227,9 @@
 								/>
 							</div>
 							<div>
-								<label class="mb-1 block text-xs font-medium text-gray-600">Tag</label>
+								<label class="mb-1 block text-xs font-medium text-gray-600" for={dayId}>Tag</label>
 								<input
+									id={dayId}
 									type="number"
 									min="1"
 									max="31"
@@ -391,6 +400,9 @@
 			<div class="space-y-3">
 				{#each data.singleExpenses as expense (expense.id)}
 					{#if editingSingleId === expense.id}
+						{@const singleNameId = `single-expense-${expense.id}-name`}
+						{@const singleAmountId = `single-expense-${expense.id}-amount`}
+						{@const singleDateId = `single-expense-${expense.id}-date`}
 						<form
 							method="POST"
 							action="?/updateSingle"
@@ -399,8 +411,11 @@
 						>
 							<input type="hidden" name="id" value={expense.id} />
 							<div class="sm:col-span-2 md:col-span-1">
-								<label class="mb-1 block text-xs font-medium text-gray-600">Name</label>
+								<label class="mb-1 block text-xs font-medium text-gray-600" for={singleNameId}
+									>Name</label
+								>
 								<input
+									id={singleNameId}
 									type="text"
 									name="name"
 									required
@@ -409,8 +424,11 @@
 								/>
 							</div>
 							<div>
-								<label class="mb-1 block text-xs font-medium text-gray-600">Betrag (€)</label>
+								<label class="mb-1 block text-xs font-medium text-gray-600" for={singleAmountId}
+									>Betrag (€)</label
+								>
 								<input
+									id={singleAmountId}
 									type="number"
 									step="0.01"
 									min="0"
@@ -421,8 +439,11 @@
 								/>
 							</div>
 							<div>
-								<label class="mb-1 block text-xs font-medium text-gray-600">Datum</label>
+								<label class="mb-1 block text-xs font-medium text-gray-600" for={singleDateId}
+									>Datum</label
+								>
 								<input
+									id={singleDateId}
 									type="date"
 									name="date"
 									required
