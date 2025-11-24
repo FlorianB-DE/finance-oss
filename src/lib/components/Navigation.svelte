@@ -4,13 +4,14 @@
 
 	const { userEmail } = $props<{ userEmail: string }>();
 
-	const navigation = [
-		{ href: '/', label: 'Übersicht' },
-		{ href: '/invoices', label: 'Rechnungen' },
-		{ href: '/planner', label: 'Planer' },
-		{ href: '/recipients', label: 'Empfänger' },
-		{ href: '/settings', label: 'Einstellungen' }
-	] as const;
+const navigation = [
+	{ href: '/', label: 'Übersicht' },
+	{ href: '/invoices', label: 'Rechnungen' },
+	{ href: '/planner', label: 'Planer' },
+	{ href: '/recipients', label: 'Empfänger' },
+	{ href: '/log', label: 'Log' },
+	{ href: '/settings', label: 'Einstellungen' }
+] as const;
 
 	let mobileMenuOpen = $state(false);
 </script>

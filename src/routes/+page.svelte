@@ -24,7 +24,7 @@
 		<p class="text-sm text-gray-500">Verwalte Rechnungen und Stammdaten zentral.</p>
 	</section>
 
-	<section class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+	<section class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
 		<div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
 			<p class="text-sm text-gray-500">Rechnungen gesamt</p>
 			<p class="mt-2 text-3xl font-semibold text-gray-900">{data.stats.count}</p>
@@ -40,6 +40,17 @@
 			<p class="mt-2 text-3xl font-semibold text-gray-900">
 				{defaultTaxRate} %
 			</p>
+		</div>
+		<div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+			<p class="text-sm text-gray-500">Letzter Login</p>
+			{#if data.lastSuccessfulLogin}
+				<p class="mt-2 text-lg font-semibold text-gray-900">
+					{format(new Date(data.lastSuccessfulLogin), "dd.MM.yyyy 'um' HH:mm")} Uhr
+				</p>
+			{:else}
+				<p class="mt-2 text-lg font-semibold text-gray-900">Keine Daten</p>
+				<p class="text-xs text-gray-500">Es wurde noch kein Login erfasst.</p>
+			{/if}
 		</div>
 	</section>
 

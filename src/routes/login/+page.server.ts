@@ -9,6 +9,7 @@ import {
 	getSessionCookieAttributes,
 	verifyPassword
 } from '$lib/server/auth';
+import { recordLoginAttempt } from '$lib/server/login-attempts';
 import { createLogger } from '$lib/server/logger';
 import { z } from 'zod';
 
@@ -46,30 +47,67 @@ export const load: PageServerLoad = async ({ locals }) => {
 };
 
 export const actions: Actions = {
-	login: async ({ request, cookies }) => {
+	login: async ({ request, cookies, getClientAddress }) => {
+		const ipAddress = getClientAddress();
+		const userAgent = request.headers.get('user-agent');
+
 		const formData = Object.fromEntries(await request.formData());
 		const parsed = loginSchema.safeParse(formData);
 
 		if (!parsed.success) {
+			await recordLoginAttempt({
+				email: String(formData.email ?? 'unbekannt'),
+				success: false,
+				ipAddress,
+				userAgent
+			});
 			return fail(400, { errors: parsed.error.flatten().fieldErrors });
 		}
 
 		const user = await getUserByEmail(parsed.data.email);
 		if (!user) {
+			await recordLoginAttempt({
+				email: parsed.data.email,
+				success: false,
+				ipAddress,
+				userAgent
+			});
 			return fail(400, { message: 'Unbekannter Nutzer' });
 		}
 
 		if (!user.passwordHash) {
+			await recordLoginAttempt({
+				email: parsed.data.email,
+				success: false,
+				userId: user.id,
+				ipAddress,
+				userAgent
+			});
 			return fail(400, { message: 'Dieser Nutzer verwendet OIDC-Anmeldung' });
 		}
 
 		const isValid = await verifyPassword(parsed.data.password, user.passwordHash);
 		if (!isValid) {
+			await recordLoginAttempt({
+				email: parsed.data.email,
+				success: false,
+				userId: user.id,
+				ipAddress,
+				userAgent
+			});
 			return fail(400, { message: 'Falsches Passwort' });
 		}
 
 		const session = await createSession(user.id);
 		cookies.set(SESSION_COOKIE, session.id, getSessionCookieAttributes(session.expiresAt));
+
+		await recordLoginAttempt({
+			email: parsed.data.email,
+			success: true,
+			userId: user.id,
+			ipAddress,
+			userAgent
+		});
 
 		throw redirect(303, '/');
 	},

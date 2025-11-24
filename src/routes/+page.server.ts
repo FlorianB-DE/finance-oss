@@ -2,9 +2,12 @@ import type { PageServerLoad } from './$types';
 import { prisma } from '$lib/server/prisma';
 import { getOrCreateSettings } from '$lib/server/settings';
 import { generateForecast } from '$lib/server/expenses';
+import { getLastSuccessfulLogin } from '$lib/server/login-attempts';
 import { isBefore, subMonths, startOfMonth, getDaysInMonth, setDate } from 'date-fns';
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ locals }) => {
+	const lastLoginPromise = locals.user ? getLastSuccessfulLogin(locals.user.id) : Promise.resolve(null);
+
 	const [
 		settings,
 		stats,
@@ -13,7 +16,8 @@ export const load: PageServerLoad = async () => {
 		sentInvoices,
 		draftInvoices,
 		singleExpenses,
-		monthlyExpenses
+		monthlyExpenses,
+		lastSuccessfulLogin
 	] = await Promise.all([
 		getOrCreateSettings(),
 		prisma.invoice.aggregate({
@@ -50,7 +54,8 @@ export const load: PageServerLoad = async () => {
 		prisma.monthlyExpense.findMany({
 			where: { active: true },
 			orderBy: { dayOfMonth: 'asc' }
-		})
+		}),
+		lastLoginPromise
 	]);
 
 	// Convert Prisma Decimal to number for serialization
@@ -206,6 +211,7 @@ export const load: PageServerLoad = async () => {
 		recentTransactions: recentTransactions.map(t => ({
 			...t,
 			date: t.date.toISOString()
-		}))
+		})),
+		lastSuccessfulLogin: lastSuccessfulLogin ? lastSuccessfulLogin.createdAt.toISOString() : null
 	};
 };
