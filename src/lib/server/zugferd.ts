@@ -16,8 +16,7 @@ import {
 import { getInvoiceOutputDir, toStoredInvoicePath } from '$lib/server/invoice-storage';
 import { createLogger } from '$lib/server/logger';
 
-const FACTURX_CUSTOMIZATION_ID =
-	'urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended';
+const FACTURX_CUSTOMIZATION_ID = 'urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended';
 const FACTURX_PROFILE_ID = 'urn:factur-x.eu:1p0:extended';
 const DEFAULT_COUNTRY_CODE = 'DE';
 const DEFAULT_UNIT_CODE = 'C62';
@@ -101,7 +100,7 @@ function buildInvoiceData(invoice: RenderInvoice, settings: Settings): Invoice {
 		throw new Error('Rechnung enthält keine Positionen');
 	}
 
-	const currency = ((invoice.currency ?? 'EUR').toUpperCase() as CurrencyCode);
+	const currency = (invoice.currency ?? 'EUR').toUpperCase() as CurrencyCode;
 	const sellerName = settings.companyName ?? settings.personName ?? 'Unbekannt';
 	const buyerName = invoice.recipient.company ?? invoice.recipient.name ?? 'Empfänger';
 
@@ -109,18 +108,24 @@ function buildInvoiceData(invoice: RenderInvoice, settings: Settings): Invoice {
 	const customerCountry = normalizeCountryCode(invoice.recipient.country);
 
 	const sellerEndpoint = deriveEndpoint(settings.emailFrom, 'seller');
-	const buyerEndpoint = deriveEndpoint(invoice.recipient.email, `recipient-${invoice.recipient.id}`);
+	const buyerEndpoint = deriveEndpoint(
+		invoice.recipient.email,
+		`recipient-${invoice.recipient.id}`
+	);
 
-	const supplierAddress =
-		buildPostalAddress(settings.street, settings.postalCode, settings.city, supplierCountry) as Invoice['ubl:Invoice']['cac:AccountingSupplierParty']['cac:Party']['cac:PostalAddress'];
+	const supplierAddress = buildPostalAddress(
+		settings.street,
+		settings.postalCode,
+		settings.city,
+		supplierCountry
+	) as Invoice['ubl:Invoice']['cac:AccountingSupplierParty']['cac:Party']['cac:PostalAddress'];
 
-	const customerAddress =
-		buildPostalAddress(
-			invoice.recipient.street,
-			invoice.recipient.postalCode,
-			invoice.recipient.city,
-			customerCountry
-		) as Invoice['ubl:Invoice']['cac:AccountingCustomerParty']['cac:Party']['cac:PostalAddress'];
+	const customerAddress = buildPostalAddress(
+		invoice.recipient.street,
+		invoice.recipient.postalCode,
+		invoice.recipient.city,
+		customerCountry
+	) as Invoice['ubl:Invoice']['cac:AccountingCustomerParty']['cac:Party']['cac:PostalAddress'];
 
 	const invoiceLines = buildInvoiceLines(invoice.lineItems, currency);
 	const invoiceLineTuple = toNonEmptyTuple(
@@ -184,21 +189,25 @@ function buildInvoiceData(invoice: RenderInvoice, settings: Settings): Invoice {
 		'cac:TaxTotal': taxTotals,
 		'cac:LegalMonetaryTotal': {
 			'cbc:LineExtensionAmount': formatAmount(invoice.totalNet),
-			'cbc:LineExtensionAmount@currencyID': castCurrency<
-				Invoice['ubl:Invoice']['cac:LegalMonetaryTotal']['cbc:LineExtensionAmount@currencyID']
-			>(currency),
+			'cbc:LineExtensionAmount@currencyID':
+				castCurrency<
+					Invoice['ubl:Invoice']['cac:LegalMonetaryTotal']['cbc:LineExtensionAmount@currencyID']
+				>(currency),
 			'cbc:TaxExclusiveAmount': formatAmount(invoice.totalNet),
-			'cbc:TaxExclusiveAmount@currencyID': castCurrency<
-				Invoice['ubl:Invoice']['cac:LegalMonetaryTotal']['cbc:TaxExclusiveAmount@currencyID']
-			>(currency),
+			'cbc:TaxExclusiveAmount@currencyID':
+				castCurrency<
+					Invoice['ubl:Invoice']['cac:LegalMonetaryTotal']['cbc:TaxExclusiveAmount@currencyID']
+				>(currency),
 			'cbc:TaxInclusiveAmount': formatAmount(invoice.totalGross),
-			'cbc:TaxInclusiveAmount@currencyID': castCurrency<
-				Invoice['ubl:Invoice']['cac:LegalMonetaryTotal']['cbc:TaxInclusiveAmount@currencyID']
-			>(currency),
+			'cbc:TaxInclusiveAmount@currencyID':
+				castCurrency<
+					Invoice['ubl:Invoice']['cac:LegalMonetaryTotal']['cbc:TaxInclusiveAmount@currencyID']
+				>(currency),
 			'cbc:PayableAmount': formatAmount(invoice.totalGross),
-			'cbc:PayableAmount@currencyID': castCurrency<
-				Invoice['ubl:Invoice']['cac:LegalMonetaryTotal']['cbc:PayableAmount@currencyID']
-			>(currency)
+			'cbc:PayableAmount@currencyID':
+				castCurrency<
+					Invoice['ubl:Invoice']['cac:LegalMonetaryTotal']['cbc:PayableAmount@currencyID']
+				>(currency)
 		},
 		'cac:InvoiceLine': invoiceLineTuple
 	} satisfies Invoice['ubl:Invoice'];
@@ -210,12 +219,10 @@ function buildInvoiceLines(
 	items: RenderInvoiceLineItem[],
 	currency: CurrencyCode
 ): InvoiceLinePayload[] {
-	const lineCurrency = castCurrency<InvoiceLinePayload['cbc:LineExtensionAmount@currencyID']>(
-		currency
-	);
-	const priceCurrency = castCurrency<
-		InvoiceLinePayload['cac:Price']['cbc:PriceAmount@currencyID']
-	>(currency);
+	const lineCurrency =
+		castCurrency<InvoiceLinePayload['cbc:LineExtensionAmount@currencyID']>(currency);
+	const priceCurrency =
+		castCurrency<InvoiceLinePayload['cac:Price']['cbc:PriceAmount@currencyID']>(currency);
 
 	return items.map((item, index) => {
 		const description = item.description || `Position ${index + 1}`;
@@ -281,9 +288,8 @@ function buildTaxSummary(
 		last.taxAmount = roundToTwo(last.taxAmount + diff);
 	}
 
-	const taxableCurrency = castCurrency<InvoiceTaxSubtotal['cbc:TaxableAmount@currencyID']>(
-		currency
-	);
+	const taxableCurrency =
+		castCurrency<InvoiceTaxSubtotal['cbc:TaxableAmount@currencyID']>(currency);
 	const taxCurrency = castCurrency<InvoiceTaxSubtotal['cbc:TaxAmount@currencyID']>(currency);
 
 	const breakdown: InvoiceTaxSubtotal[] = breakdownEntries.map(entry => ({
