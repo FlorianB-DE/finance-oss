@@ -25,6 +25,7 @@ const EMAIL_SCHEME_ID = 'EM';
 const PAYMENT_MEANS_CODE = '31';
 const PAYMENT_MEANS_NAME = 'Überweisung';
 const FALLBACK_EMAIL = 'info@example.com';
+const INTERNAL_ENDPOINT_DOMAIN = 'finances.internal';
 
 const invoiceService = new InvoiceService(console);
 
@@ -34,7 +35,10 @@ type InvoiceTaxTotal = Invoice['ubl:Invoice']['cac:TaxTotal'][number];
 type InvoiceTaxSubtotal = NonNullable<InvoiceTaxTotal['cac:TaxSubtotal']>[number];
 type PaymentInstruction = NonNullable<Invoice['ubl:Invoice']['cac:PaymentMeans']>[number];
 type PaymentTermsPayload = Invoice['ubl:Invoice']['cac:PaymentTerms'];
-type Endpoint = { id: string; scheme?: typeof EMAIL_SCHEME_ID };
+type EndpointScheme = NonNullable<
+	Invoice['ubl:Invoice']['cac:AccountingSupplierParty']['cac:Party']['cbc:EndpointID@schemeID']
+>;
+type Endpoint = { id: string; scheme: EndpointScheme };
 
 const OUTPUT_DIR = getInvoiceOutputDir();
 const log = createLogger({ module: 'zugferd' });
@@ -159,7 +163,7 @@ function buildInvoiceData(invoice: RenderInvoice, settings: Settings): Invoice {
 		'cac:AccountingSupplierParty': {
 			'cac:Party': {
 				'cbc:EndpointID': sellerEndpoint.id,
-				...(sellerEndpoint.scheme ? { 'cbc:EndpointID@schemeID': sellerEndpoint.scheme } : {}),
+				'cbc:EndpointID@schemeID': sellerEndpoint.scheme,
 				'cac:PartyName': {
 					'cbc:Name': sellerName
 				},
@@ -174,7 +178,7 @@ function buildInvoiceData(invoice: RenderInvoice, settings: Settings): Invoice {
 		'cac:AccountingCustomerParty': {
 			'cac:Party': {
 				'cbc:EndpointID': buyerEndpoint.id,
-				...(buyerEndpoint.scheme ? { 'cbc:EndpointID@schemeID': buyerEndpoint.scheme } : {}),
+				'cbc:EndpointID@schemeID': buyerEndpoint.scheme,
 				'cac:PartyName': {
 					'cbc:Name': buyerName
 				},
@@ -368,17 +372,30 @@ function buildPaymentTerms(invoice: RenderInvoice): PaymentTermsPayload | undefi
 }
 
 function deriveEndpoint(preferred?: string | null, fallback?: string): Endpoint {
-	const trimmedPreferred = preferred?.trim();
-	if (trimmedPreferred) {
-		return { id: trimmedPreferred, scheme: EMAIL_SCHEME_ID };
+	const preferredEndpoint = buildEndpointId(preferred);
+	if (preferredEndpoint) {
+		return preferredEndpoint;
 	}
 
-	const trimmedFallback = fallback?.trim();
-	if (trimmedFallback) {
-		return { id: trimmedFallback };
+	const fallbackEndpoint = buildEndpointId(fallback);
+	if (fallbackEndpoint) {
+		return fallbackEndpoint;
 	}
 
 	return { id: FALLBACK_EMAIL, scheme: EMAIL_SCHEME_ID };
+}
+
+function buildEndpointId(value?: string | null): Endpoint | undefined {
+	const trimmed = value?.trim();
+	if (!trimmed) {
+		return undefined;
+	}
+
+	if (trimmed.includes('@')) {
+		return { id: trimmed, scheme: EMAIL_SCHEME_ID };
+	}
+
+	return { id: `${trimmed}@${INTERNAL_ENDPOINT_DOMAIN}`, scheme: EMAIL_SCHEME_ID };
 }
 
 function buildPostalAddress(
