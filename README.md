@@ -7,10 +7,13 @@ Finances OSS is a SvelteKit-based prototype for managing freelance-style invoice
 - Prisma + SQLite persistence for users, sessions, and invoices.
 - Server-driven PDF rendering using Puppeteer plus a Svelte invoice template.
 
+## Screenshot
+<img width="1226" height="832" alt="image" src="https://github.com/user-attachments/assets/67c1a1bf-8a5f-4974-9390-d7f2ea602069" />
+
+
 ## ⚠️ Important Notices
 
 - **No legal/compliance guarantee** – This software does **not** aim to satisfy any regulatory, legal, accounting, or tax requirements. It is purely educational.
-- **Non-commercial only** – The project is licensed under [CC BY-NC 4.0](LICENSE). Commercial usage, resale, or SaaS deployment is not permitted.
 - **Use at your own risk** – The code is provided “as is,” without warranties or support. You are solely responsible for reviewing and operating it safely.
 
 ## Getting Started
@@ -29,4 +32,4 @@ The repo ships a NixOS module (`configuration.nix`) that fetches release artifac
 
 ## License
 
-Distributed under the [Creative Commons Attribution-NonCommercial 4.0 International License](LICENSE). Use for non-commercial purposes only.
+MIT
