@@ -1,0 +1,56 @@
+# Git
+.git
+.gitignore
+
+# Dependencies
+node_modules
+
+# Build outputs (will be built in Docker)
+build
+dist
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs
+
+# Cache
+.cache
+.npm
+.bun
+
+# Test files
+coverage
+.nyc_output
+
+# Documentation
+README.md
+*.md
+
+# NixOS specific
+configuration.nix
+nix/
+result
+
+# Database files (will be created at runtime)
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary files
+tmp
+temp
