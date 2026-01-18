@@ -3,6 +3,10 @@ import type { Invoice } from '$lib/server/prisma/client';
 import { getNextInvoiceNumber } from '$lib/server/settings';
 import { addDays } from 'date-fns';
 import { generateZugferdArtifacts } from '$lib/server/zugferd';
+import { isWebDAVConfigured, uploadInvoiceToWebDAV } from '$lib/server/webdav';
+import { createLogger } from '$lib/server/logger';
+
+const log = createLogger({ module: 'invoices' });
 
 type CreateInvoiceInput = {
 	recipientId: number;
@@ -83,8 +87,51 @@ export function calculateTotals(items: CreateInvoiceInput['items']) {
 }
 
 export async function markInvoiceStatus(id: number, status: Invoice['status']) {
+	const invoice = await prisma.invoice.findUnique({
+		where: { id },
+		select: { status: true, pdfPath: true, number: true, webdavStoredAt: true }
+	});
+
+	if (!invoice) {
+		throw new Error('Invoice not found');
+	}
+
+	// If transitioning from DRAFT to SENT, upload to WebDAV if configured
+	if (invoice.status === 'DRAFT' && status === 'SENT' && isWebDAVConfigured()) {
+		if (!invoice.pdfPath) {
+			throw new Error('Cannot upload to WebDAV: PDF not found');
+		}
+
+		if (invoice.webdavStoredAt) {
+			log.warn(
+				{ invoiceId: id, invoiceNumber: invoice.number },
+				'Invoice already stored to WebDAV, skipping upload'
+			);
+		} else {
+			try {
+				await uploadInvoiceToWebDAV(invoice.number, invoice.pdfPath);
+				log.info(
+					{ invoiceId: id, invoiceNumber: invoice.number },
+					'Invoice PDF uploaded to WebDAV'
+				);
+			} catch (error) {
+				log.error(
+					{ err: error, invoiceId: id, invoiceNumber: invoice.number },
+					'Failed to upload invoice to WebDAV'
+				);
+				throw new Error(`Failed to upload invoice to WebDAV: ${error instanceof Error ? error.message : 'Unknown error'}`);
+			}
+		}
+	}
+
 	return prisma.invoice.update({
 		where: { id },
-		data: { status }
+		data: {
+			status,
+			// Set webdavStoredAt when transitioning to SENT if WebDAV is configured
+			...(invoice.status === 'DRAFT' && status === 'SENT' && isWebDAVConfigured()
+				? { webdavStoredAt: new Date() }
+				: {})
+		}
 	});
 }

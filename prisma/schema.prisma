@@ -91,12 +91,13 @@ model Invoice {
   totalNet    Decimal
   totalTax    Decimal
   totalGross  Decimal
-  pdfPath     String?
-  xmlPath     String?
-  texPath     String?
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-  lineItems   InvoiceLineItem[]
+  pdfPath       String?
+  xmlPath       String?
+  texPath       String?
+  webdavStoredAt DateTime?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  lineItems     InvoiceLineItem[]
 }
 
 model InvoiceLineItem {

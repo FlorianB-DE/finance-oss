@@ -53,6 +53,13 @@ export async function generateZugferdArtifacts(invoiceId: number) {
 		throw new Error('Rechnung nicht gefunden');
 	}
 
+	// Prevent regeneration if invoice has been stored to WebDAV
+	if (invoice.webdavStoredAt) {
+		throw new Error(
+			'Rechnung kann nicht neu generiert werden, da sie bereits in WebDAV gespeichert wurde'
+		);
+	}
+
 	const settings = await getOrCreateSettings();
 	const normalizedInvoice = normalizeInvoice(invoice);
 

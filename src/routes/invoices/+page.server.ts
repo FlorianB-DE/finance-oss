@@ -93,6 +93,18 @@ export const actions: Actions = {
 		const id = Number(form.get('invoiceId'));
 		if (!id) return fail(400, { message: 'ID fehlt' });
 		try {
+			// Check if invoice has been stored to WebDAV
+			const invoice = await prisma.invoice.findUnique({
+				where: { id },
+				select: { webdavStoredAt: true }
+			});
+
+			if (invoice?.webdavStoredAt) {
+				return fail(403, {
+					error: 'Rechnung kann nicht neu generiert werden, da sie bereits in WebDAV gespeichert wurde'
+				});
+			}
+
 			const artifacts = await generateZugferdArtifacts(id);
 			await prisma.invoice.update({
 				where: { id },
@@ -101,7 +113,9 @@ export const actions: Actions = {
 			return { success: true, message: 'ZUGFeRD erfolgreich neu generiert!' };
 		} catch (error) {
 			log.error({ err: error, invoiceId: id }, 'Failed to regenerate invoice');
-			return fail(500, { error: 'Fehler beim Generieren der Rechnung' });
+			const errorMessage =
+				error instanceof Error ? error.message : 'Fehler beim Generieren der Rechnung';
+			return fail(500, { error: errorMessage });
 		}
 	},
 	send: async ({ request }) => {
@@ -127,7 +141,9 @@ export const actions: Actions = {
 			return { success: true, message: 'Status erfolgreich aktualisiert!' };
 		} catch (error) {
 			log.error({ err: error, invoiceId: id, status }, 'Failed to update invoice status');
-			return fail(500, { error: 'Fehler beim Aktualisieren des Status' });
+			const errorMessage =
+				error instanceof Error ? error.message : 'Fehler beim Aktualisieren des Status';
+			return fail(500, { error: errorMessage });
 		}
 	},
 	delete: async ({ request }) => {
