@@ -79,7 +79,10 @@ export const actions: Actions = {
 			delete sanitized.smtpPort;
 		}
 
-		if (typeof payload.overrideInvoiceStartNumber === 'number' && !Number.isNaN(payload.overrideInvoiceStartNumber)) {
+		if (
+			typeof payload.overrideInvoiceStartNumber === 'number' &&
+			!Number.isNaN(payload.overrideInvoiceStartNumber)
+		) {
 			sanitized.overrideInvoiceStartNumber = payload.overrideInvoiceStartNumber;
 		} else if (payload.overrideInvoiceStartNumber === undefined) {
 			delete sanitized.overrideInvoiceStartNumber;
