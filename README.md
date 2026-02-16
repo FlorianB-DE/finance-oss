@@ -8,8 +8,8 @@ Finances OSS is a SvelteKit-based prototype for managing freelance-style invoice
 - Server-driven PDF rendering using Puppeteer plus a Svelte invoice template.
 
 ## Screenshot
-<img width="1226" height="832" alt="image" src="https://github.com/user-attachments/assets/67c1a1bf-8a5f-4974-9390-d7f2ea602069" />
 
+<img width="1226" height="832" alt="image" src="https://github.com/user-attachments/assets/67c1a1bf-8a5f-4974-9390-d7f2ea602069" />
 
 ## ⚠️ Important Notices
 
