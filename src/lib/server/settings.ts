@@ -22,13 +22,20 @@ export async function updateSettings(data: Partial<Settings>) {
 }
 
 export async function getNextInvoiceNumber() {
-	const updated = await prisma.settings.update({
-		where: { id: SETTINGS_ID },
-		data: { lastInvoiceCounter: { increment: 1 } },
-		select: { lastInvoiceCounter: true, invoicePrefix: true }
-	});
-	const prefix = updated.invoicePrefix?.trim() ?? 'RE';
-	const padded = updated.lastInvoiceCounter.toString().padStart(4, '0');
+	const settings = await getOrCreateSettings();
 	const year = new Date().getFullYear();
+	const firstDayOfYear = new Date(year, 0, 1);
+	const lastDayOfYear = new Date(year, 11, 31);
+
+	const invoiceCount = await prisma.invoice.count({
+		where: {
+			issueDate: { gte: firstDayOfYear, lte: lastDayOfYear }
+		}
+	});
+
+	const invoiceNumber = settings.overrideInvoiceStartNumber + invoiceCount;
+
+	const padded = invoiceNumber.toString().padStart(4, '0');
+	const prefix = settings.invoicePrefix?.trim() ?? 'RE';
 	return `${prefix}-${year}-${padded}`;
 }

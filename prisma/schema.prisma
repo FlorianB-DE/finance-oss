@@ -38,31 +38,31 @@ model Session {
 }
 
 model Settings {
-  id                 Int      @id @default(1)
-  personName         String?
-  companyName        String?
-  legalStatus        String?
-  defaultTaxRate     Decimal?
-  vatId              String?
-  taxNumber          String?
-  wirtschaftsIdentNr String?
-  street             String?
-  postalCode         String?
-  city               String?
-  country            String?
-  iban               String?
-  bic                String?
-  emailFrom          String?
-  smtpHost           String?
-  smtpPort           Int?
-  smtpUser           String?
-  smtpPassword       String?
-  emailSignature     String?
-  lastInvoiceCounter Int      @default(0)
-  invoicePrefix      String?
-  startingBalance    Decimal  @default(0)
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  id                         Int      @id @default(autoincrement())
+  personName                 String?
+  companyName                String?
+  legalStatus                String?
+  defaultTaxRate             Decimal?
+  vatId                      String?
+  taxNumber                  String?
+  wirtschaftsIdentNr         String?
+  street                     String?
+  postalCode                 String?
+  city                       String?
+  country                    String?
+  iban                       String?
+  bic                        String?
+  emailFrom                  String?
+  smtpHost                   String?
+  smtpPort                   Int?
+  smtpUser                   String?
+  smtpPassword               String?
+  emailSignature             String?
+  overrideInvoiceStartNumber Int      @default(0)
+  invoicePrefix              String?
+  startingBalance            Decimal  @default(0)
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt
 }
 
 model Recipient {
