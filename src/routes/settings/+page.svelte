@@ -21,7 +21,8 @@
 		| 'country'
 		| 'iban'
 		| 'bic'
-		| 'invoicePrefix';
+		| 'invoicePrefix'
+		| 'overrideInvoiceStartNumber';
 
 	const fields: Array<{
 		name: SettingsField;
@@ -41,7 +42,13 @@
 		{ name: 'country', label: 'Land' },
 		{ name: 'iban', label: 'IBAN' },
 		{ name: 'bic', label: 'BIC' },
-		{ name: 'invoicePrefix', label: 'Rechnungspräfix' }
+		{ name: 'invoicePrefix', label: 'Rechnungspräfix' },
+		{
+			name: 'overrideInvoiceStartNumber',
+			label: 'Rechnungs-Nr. Startwert (0 = automatisch)',
+			type: 'number',
+			step: '1'
+		}
 	];
 
 	const asInputValue = (value: unknown) => {

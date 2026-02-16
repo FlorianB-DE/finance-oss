@@ -26,7 +26,8 @@ const schema = z.object({
 	smtpUser: z.string().optional(),
 	smtpPassword: z.string().optional(),
 	emailSignature: z.string().optional(),
-	invoicePrefix: z.string().optional()
+	invoicePrefix: z.string().optional(),
+	overrideInvoiceStartNumber: z.coerce.number().min(0).int().optional()
 });
 
 export const load: PageServerLoad = async () => {
@@ -76,6 +77,12 @@ export const actions: Actions = {
 			sanitized.smtpPort = payload.smtpPort;
 		} else if (payload.smtpPort === undefined) {
 			delete sanitized.smtpPort;
+		}
+
+		if (typeof payload.overrideInvoiceStartNumber === 'number' && !Number.isNaN(payload.overrideInvoiceStartNumber)) {
+			sanitized.overrideInvoiceStartNumber = payload.overrideInvoiceStartNumber;
+		} else if (payload.overrideInvoiceStartNumber === undefined) {
+			delete sanitized.overrideInvoiceStartNumber;
 		}
 
 		try {
