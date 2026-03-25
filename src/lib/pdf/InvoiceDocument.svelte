@@ -19,8 +19,10 @@
 		settings.country
 	].filter(line => (line ?? '').toString().trim().length > 0);
 
-	const recipientLines = [
-		invoice.recipient.company,
+	const recipientCompany = (invoice.recipient.company ?? '').trim();
+	const recipientPersonName = (invoice.recipient.name ?? '').trim();
+
+	const recipientAddressLines = [
 		invoice.recipient.street,
 		[invoice.recipient.postalCode, invoice.recipient.city].filter(Boolean).join(' '),
 		invoice.recipient.country
@@ -85,12 +87,21 @@
 		</div>
 		<div class="rounded-lg border border-[#e2e8f0] bg-white p-3" data-section="meta">
 			<p class="mb-1.5 text-[11px] tracking-[0.08em] text-[#94a3b8] uppercase">An</p>
-			<p class="mb-1 text-[15px] font-semibold text-[#1f2a44]" data-field="recipient-name">
-				{invoice.recipient.name ?? invoice.recipient.company ?? ''}
-			</p>
+			<div class="mb-1" data-field="recipient-name">
+				{#if recipientCompany}
+					<p class="m-0 text-[15px] font-semibold text-[#1f2a44]">{recipientCompany}</p>
+					{#if recipientPersonName}
+						<p class="m-0 mt-0.5 text-[15px] font-semibold text-[#1f2a44]">
+							z.H. {recipientPersonName}
+						</p>
+					{/if}
+				{:else}
+					<p class="m-0 text-[15px] font-semibold text-[#1f2a44]">{recipientPersonName}</p>
+				{/if}
+			</div>
 			<p class="text-xs whitespace-pre-line text-[#4c5a88]" data-field="recipient-address">
-				{#each recipientLines as line, index (index)}
-					<span>{line}</span>{#if index < recipientLines.length - 1}<br />{/if}
+				{#each recipientAddressLines as line, index (index)}
+					<span>{line}</span>{#if index < recipientAddressLines.length - 1}<br />{/if}
 				{/each}
 			</p>
 			{#if invoice.recipient.email}
