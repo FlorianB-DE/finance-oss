@@ -105,8 +105,8 @@ function buildInvoiceData(invoice: RenderInvoice, settings: Settings): Invoice {
 	}
 
 	const currency = (invoice.currency ?? 'EUR').toUpperCase() as CurrencyCode;
-	const sellerPersonName = settings.personName ?? settings.companyName ?? 'Unbekannt';
-	const sellerBusinessName = settings.companyName ?? settings.personName ?? 'Unbekannt';
+	const sellerPersonName = settings.companyName ?? settings.personName ?? 'Unbekannt';
+	const sellerBusinessName = settings.personName ?? settings.companyName ?? 'Unbekannt';
 	const buyerName = invoice.recipient.company ?? invoice.recipient.name ?? 'Empfänger';
 
 	const supplierCountry = normalizeCountryCode(settings.country);
