@@ -166,12 +166,13 @@ function buildInvoiceData(invoice: RenderInvoice, settings: Settings): Invoice {
 	);
 	const paymentTerms = buildPaymentTerms(invoice);
 	const notes = extractNotes(invoice.notes);
+	// @e-invoice-eu/core: UBL RegistrationName → ram:Name (BT-27), PartyName → ram:TradingBusinessName (BT-28).
 	const supplierLegalEntity = buildPartyLegalEntity(
-		sellerTradingName ?? sellerLegalName,
+		sellerLegalName,
 		settings.vatId ?? undefined,
 		settings.legalStatus ?? undefined
 	);
-	const customerLegalEntity = buildPartyLegalEntity(buyerTradingName ?? buyerLegalName);
+	const customerLegalEntity = buildPartyLegalEntity(buyerLegalName);
 
 	const ublInvoice = {
 		'cbc:CustomizationID': FACTURX_CUSTOMIZATION_ID,
@@ -186,9 +187,7 @@ function buildInvoiceData(invoice: RenderInvoice, settings: Settings): Invoice {
 			'cac:Party': {
 				'cbc:EndpointID': sellerEndpoint.id,
 				'cbc:EndpointID@schemeID': sellerEndpoint.scheme,
-				'cac:PartyName': {
-					'cbc:Name': sellerLegalName
-				},
+				...(sellerTradingName ? { 'cac:PartyName': { 'cbc:Name': sellerTradingName } } : {}),
 				'cac:PostalAddress': supplierAddress,
 				'cac:PartyLegalEntity': supplierLegalEntity
 			}
@@ -197,9 +196,7 @@ function buildInvoiceData(invoice: RenderInvoice, settings: Settings): Invoice {
 			'cac:Party': {
 				'cbc:EndpointID': buyerEndpoint.id,
 				'cbc:EndpointID@schemeID': buyerEndpoint.scheme,
-				'cac:PartyName': {
-					'cbc:Name': buyerLegalName
-				},
+				...(buyerTradingName ? { 'cac:PartyName': { 'cbc:Name': buyerTradingName } } : {}),
 				'cac:PostalAddress': customerAddress,
 				'cac:PartyLegalEntity': customerLegalEntity
 			}
