@@ -105,7 +105,8 @@ function buildInvoiceData(invoice: RenderInvoice, settings: Settings): Invoice {
 	}
 
 	const currency = (invoice.currency ?? 'EUR').toUpperCase() as CurrencyCode;
-	const sellerName = settings.companyName ?? settings.personName ?? 'Unbekannt';
+	const sellerPersonName = settings.personName ?? settings.companyName ?? 'Unbekannt';
+	const sellerBusinessName = settings.companyName ?? settings.personName ?? 'Unbekannt';
 	const buyerName = invoice.recipient.company ?? invoice.recipient.name ?? 'Empfänger';
 
 	const supplierCountry = normalizeCountryCode(settings.country);
@@ -147,7 +148,7 @@ function buildInvoiceData(invoice: RenderInvoice, settings: Settings): Invoice {
 		}
 	];
 
-	const paymentInstructions = buildPaymentInstructions(settings, sellerName, invoice);
+	const paymentInstructions = buildPaymentInstructions(settings, sellerBusinessName, invoice);
 	const paymentTerms = buildPaymentTerms(invoice);
 	const notes = extractNotes(invoice.notes);
 
@@ -165,11 +166,11 @@ function buildInvoiceData(invoice: RenderInvoice, settings: Settings): Invoice {
 				'cbc:EndpointID': sellerEndpoint.id,
 				'cbc:EndpointID@schemeID': sellerEndpoint.scheme,
 				'cac:PartyName': {
-					'cbc:Name': sellerName
+					'cbc:Name': sellerPersonName
 				},
 				'cac:PostalAddress': supplierAddress,
 				'cac:PartyLegalEntity': {
-					'cbc:RegistrationName': sellerName,
+					'cbc:RegistrationName': sellerBusinessName,
 					...(settings.vatId ? { 'cbc:CompanyID': settings.vatId } : {}),
 					...(settings.legalStatus ? { 'cbc:CompanyLegalForm': settings.legalStatus } : {})
 				}
