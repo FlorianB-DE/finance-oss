@@ -145,7 +145,10 @@
 					class="grid gap-3"
 				>
 					<input type="hidden" name="recipientId" value={editingRecipient.id} />
-					<label class="flex items-start gap-3 text-sm text-gray-700" for="edit-recipient-is-legal-entity">
+					<label
+						class="flex items-start gap-3 text-sm text-gray-700"
+						for="edit-recipient-is-legal-entity"
+					>
 						<input
 							id="edit-recipient-is-legal-entity"
 							name="isLegalEntity"
