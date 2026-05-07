@@ -4,8 +4,20 @@ import { z } from 'zod';
 import { fail } from '@sveltejs/kit';
 import { Prisma } from '$lib/server/prisma/client';
 import { createLogger } from '$lib/server/logger';
+import path from 'node:path';
+import { existsSync } from 'node:fs';
+import { mkdir, writeFile, unlink } from 'node:fs/promises';
+import {
+	getTemplateOutputDir,
+	listTemplateFiles,
+	resolveTemplateFile,
+	safeTemplateBasename
+} from '$lib/server/template-storage';
+import { INVOICE_BODY_PLACEHOLDER } from '$lib/server/invoice-template-html';
 
 const log = createLogger({ route: 'settings' });
+
+const MAX_TEMPLATE_BYTES = 2 * 1024 * 1024;
 
 const schema = z.object({
 	personName: z.string().optional(),
@@ -32,13 +44,14 @@ const schema = z.object({
 
 export const load: PageServerLoad = async () => {
 	const settings = await getOrCreateSettings();
+	const templateFiles = await listTemplateFiles();
 	// Convert Prisma Decimal to number for serialization
 	const serializableSettings = {
 		...settings,
 		defaultTaxRate: settings.defaultTaxRate ? Number(settings.defaultTaxRate) : null,
 		startingBalance: settings.startingBalance ? Number(settings.startingBalance) : 0
 	};
-	return { settings: serializableSettings };
+	return { settings: serializableSettings, templateFiles };
 };
 
 export const actions: Actions = {
@@ -94,6 +107,99 @@ export const actions: Actions = {
 		} catch (error) {
 			log.error({ err: error }, 'Failed to update settings');
 			return fail(500, { error: 'Fehler beim Speichern der Einstellungen' });
+		}
+	},
+	uploadTemplate: async ({ request }) => {
+		const form = await request.formData();
+		const entry = form.get('template');
+		if (!entry || typeof entry === 'string') {
+			return fail(400, { templateError: 'Bitte eine HTML-Datei auswählen.' });
+		}
+
+		const buffer = Buffer.from(await entry.arrayBuffer());
+		if (buffer.length === 0) {
+			return fail(400, { templateError: 'Die Datei ist leer.' });
+		}
+		if (buffer.length > MAX_TEMPLATE_BYTES) {
+			return fail(400, { templateError: 'Die Datei ist zu groß (max. 2 MB).' });
+		}
+
+		const safeName = safeTemplateBasename(entry.name);
+		if (!safeName) {
+			return fail(400, { templateError: 'Nur .html- oder .htm-Dateien sind erlaubt.' });
+		}
+
+		const text = buffer.toString('utf-8');
+		if (!text.includes(INVOICE_BODY_PLACEHOLDER)) {
+			return fail(400, {
+				templateError: `Die Vorlage muss den Platzhalter ${INVOICE_BODY_PLACEHOLDER} enthalten.`
+			});
+		}
+
+		try {
+			const dir = getTemplateOutputDir();
+			await mkdir(dir, { recursive: true });
+			await writeFile(path.join(dir, safeName), buffer);
+			return { templateSuccess: true, templateMessage: `Vorlage „${safeName}“ wurde gespeichert.` };
+		} catch (error) {
+			log.error({ err: error }, 'Failed to save invoice template');
+			return fail(500, { templateError: 'Vorlage konnte nicht gespeichert werden.' });
+		}
+	},
+	selectTemplate: async ({ request }) => {
+		const form = await request.formData();
+		const raw = form.get('invoiceTemplatePath');
+		const value = raw === null || raw === undefined ? '' : String(raw).trim();
+
+		if (value === '') {
+			try {
+				await updateSettings({ invoiceTemplatePath: null });
+				return {
+					templateSuccess: true,
+					templateMessage: 'Es wird wieder die Standard-Rechnungsvorlage verwendet.'
+				};
+			} catch (error) {
+				log.error({ err: error }, 'Failed to clear invoice template');
+				return fail(500, { templateError: 'Auswahl konnte nicht gespeichert werden.' });
+			}
+		}
+
+		const basename = path.basename(value);
+		const abs = resolveTemplateFile(basename);
+		if (!abs || !existsSync(abs)) {
+			return fail(400, { templateError: 'Die gewählte Vorlage existiert nicht.' });
+		}
+
+		try {
+			await updateSettings({ invoiceTemplatePath: basename });
+			return { templateSuccess: true, templateMessage: `Aktive Vorlage: ${basename}` };
+		} catch (error) {
+			log.error({ err: error }, 'Failed to set invoice template');
+			return fail(500, { templateError: 'Auswahl konnte nicht gespeichert werden.' });
+		}
+	},
+	deleteTemplate: async ({ request }) => {
+		const form = await request.formData();
+		const raw = form.get('filename');
+		if (typeof raw !== 'string' || !raw.trim()) {
+			return fail(400, { templateError: 'Ungültiger Dateiname.' });
+		}
+		const basename = path.basename(raw.trim());
+		const abs = resolveTemplateFile(basename);
+		if (!abs || !existsSync(abs)) {
+			return fail(400, { templateError: 'Datei nicht gefunden.' });
+		}
+
+		try {
+			await unlink(abs);
+			const settings = await getOrCreateSettings();
+			if (settings.invoiceTemplatePath === basename) {
+				await updateSettings({ invoiceTemplatePath: null });
+			}
+			return { templateSuccess: true, templateMessage: `„${basename}“ wurde gelöscht.` };
+		} catch (error) {
+			log.error({ err: error, basename }, 'Failed to delete invoice template');
+			return fail(500, { templateError: 'Vorlage konnte nicht gelöscht werden.' });
 		}
 	}
 };

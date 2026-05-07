@@ -1,10 +1,17 @@
 import type { Settings } from '$lib/server/prisma/client';
 import path from 'node:path';
+import { existsSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
 import puppeteer from 'puppeteer';
 import { render as renderComponent } from 'svelte/server';
 import InvoiceDocument from '$lib/pdf/InvoiceDocument.svelte';
 import type { RenderInvoice } from '$lib/server/invoice-format';
 import tailwindCss from '$lib/layout.css?inline';
+import {
+	INVOICE_BODY_PLACEHOLDER,
+	mergeInvoiceTemplateHtml
+} from '$lib/server/invoice-template-html';
+import { resolveTemplateFile } from '$lib/server/template-storage';
 
 const BROWSER_ARGS = ['--no-sandbox', '--disable-setuid-sandbox'];
 const DEFAULT_CACHE_DIR = path.resolve('.cache/puppeteer');
@@ -22,7 +29,7 @@ export async function renderInvoicePdf(invoice: RenderInvoice, settings: Setting
 		props: { invoice, settings }
 	});
 
-	const fullHtml = wrapHtml(body, head, tailwindCss);
+	const fullHtml = await buildInvoiceHtml(body, head, settings);
 	const browser = await puppeteer.launch({
 		headless: 'shell',
 		args: BROWSER_ARGS
@@ -46,6 +53,24 @@ export async function renderInvoicePdf(invoice: RenderInvoice, settings: Setting
 	} finally {
 		await browser.close();
 	}
+}
+
+async function buildInvoiceHtml(body: string, head: string | undefined, settings: Settings) {
+	const rel = settings.invoiceTemplatePath?.trim();
+	if (rel) {
+		const abs = resolveTemplateFile(rel);
+		if (abs && existsSync(abs)) {
+			try {
+				const templateSource = await readFile(abs, 'utf-8');
+				if (templateSource.includes(INVOICE_BODY_PLACEHOLDER)) {
+					return mergeInvoiceTemplateHtml(templateSource, body, head);
+				}
+			} catch {
+				// fall through to default
+			}
+		}
+	}
+	return wrapHtml(body, head, tailwindCss);
 }
 
 function wrapHtml(content: string, headContent?: string, tailwindCss?: string) {
