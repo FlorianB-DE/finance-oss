@@ -8,6 +8,7 @@ import { createLogger } from '$lib/server/logger';
 const log = createLogger({ route: 'settings' });
 
 const schema = z.object({
+	isLegalEntity: z.union([z.literal('on'), z.literal('true')]).optional(),
 	personName: z.string().optional(),
 	companyName: z.string().optional(),
 	legalStatus: z.string().optional(),
@@ -43,7 +44,8 @@ export const load: PageServerLoad = async () => {
 
 export const actions: Actions = {
 	save: async ({ request }) => {
-		const form = Object.fromEntries(await request.formData());
+		const formData = await request.formData();
+		const form = Object.fromEntries(formData);
 		const parsed = schema.safeParse(form);
 		if (!parsed.success) {
 			return fail(400, { errors: parsed.error.flatten().fieldErrors, values: form });
@@ -64,6 +66,7 @@ export const actions: Actions = {
 				sanitized[key] = value;
 			}
 		}
+		sanitized.isLegalEntity = formData.has('isLegalEntity');
 
 		// Handle special numeric fields
 		if (typeof payload.defaultTaxRate === 'number') {

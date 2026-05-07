@@ -7,6 +7,7 @@ import { createLogger } from '$lib/server/logger';
 const log = createLogger({ route: 'recipients' });
 
 const recipientSchema = z.object({
+	isLegalEntity: z.union([z.literal('on'), z.literal('true')]).optional(),
 	name: z.string().min(2),
 	company: z.string().optional(),
 	email: z.string().email().optional().or(z.literal('')),
@@ -19,6 +20,14 @@ const recipientSchema = z.object({
 		.min(2, { message: 'Land ist ein Pflichtfeld' })
 		.transform(value => value.toUpperCase())
 });
+const recipientUpdateSchema = recipientSchema.extend({
+	recipientId: z.coerce.number().int().positive()
+});
+
+const toOptionalString = (value?: string) => {
+	const trimmed = value?.trim();
+	return trimmed ? trimmed : null;
+};
 
 export const load: PageServerLoad = async () => {
 	const recipients = await prisma.recipient.findMany({
@@ -30,7 +39,8 @@ export const load: PageServerLoad = async () => {
 
 export const actions: Actions = {
 	create: async ({ request }) => {
-		const form = Object.fromEntries(await request.formData());
+		const formData = await request.formData();
+		const form = Object.fromEntries(formData);
 		const parsed = recipientSchema.safeParse(form);
 		if (!parsed.success) {
 			return fail(400, { errors: parsed.error.flatten().fieldErrors });
@@ -39,17 +49,43 @@ export const actions: Actions = {
 		const data = parsed.data;
 		await prisma.recipient.create({
 			data: {
+				isLegalEntity: formData.has('isLegalEntity'),
 				name: data.name,
-				company: data.company,
-				email: data.email || null,
-				street: data.street,
-				postalCode: data.postalCode,
-				city: data.city,
+				company: toOptionalString(data.company),
+				email: toOptionalString(data.email),
+				street: toOptionalString(data.street),
+				postalCode: toOptionalString(data.postalCode),
+				city: toOptionalString(data.city),
 				country: data.country
 			}
 		});
 
 		throw redirect(303, '/recipients');
+	},
+	update: async ({ request }) => {
+		const formData = await request.formData();
+		const form = Object.fromEntries(formData);
+		const parsed = recipientUpdateSchema.safeParse(form);
+		if (!parsed.success) {
+			return fail(400, { errors: parsed.error.flatten().fieldErrors });
+		}
+
+		const data = parsed.data;
+		await prisma.recipient.update({
+			where: { id: data.recipientId },
+			data: {
+				isLegalEntity: formData.has('isLegalEntity'),
+				name: data.name,
+				company: toOptionalString(data.company),
+				email: toOptionalString(data.email),
+				street: toOptionalString(data.street),
+				postalCode: toOptionalString(data.postalCode),
+				city: toOptionalString(data.city),
+				country: data.country
+			}
+		});
+
+		return { success: true, message: 'Empfänger erfolgreich aktualisiert!' };
 	},
 	delete: async ({ request }) => {
 		const form = await request.formData();

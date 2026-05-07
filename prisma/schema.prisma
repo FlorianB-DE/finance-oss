@@ -39,6 +39,7 @@ model Session {
 
 model Settings {
   id                         Int      @id @default(autoincrement())
+  isLegalEntity              Boolean  @default(true)
   personName                 String?
   companyName                String?
   legalStatus                String?
@@ -67,6 +68,7 @@ model Settings {
 
 model Recipient {
   id         Int       @id @default(autoincrement())
+  isLegalEntity Boolean @default(true)
   name       String
   company    String?
   email      String?

@@ -105,9 +105,20 @@ function buildInvoiceData(invoice: RenderInvoice, settings: Settings): Invoice {
 	}
 
 	const currency = (invoice.currency ?? 'EUR').toUpperCase() as CurrencyCode;
-	const sellerPersonName = settings.companyName ?? settings.personName ?? 'Unbekannt';
-	const sellerBusinessName = settings.personName ?? settings.companyName ?? 'Unbekannt';
-	const buyerName = invoice.recipient.company ?? invoice.recipient.name ?? 'Empfänger';
+	const sellerIsLegalEntity = settings.isLegalEntity ?? true;
+	const sellerLegalName = sellerIsLegalEntity
+		? (settings.companyName ?? settings.personName ?? 'Unbekannt')
+		: (settings.personName ?? settings.companyName ?? 'Unbekannt');
+	const sellerTradingName = sellerIsLegalEntity
+		? undefined
+		: normalizedTradingName(settings.companyName, sellerLegalName);
+	const buyerIsLegalEntity = invoice.recipient.isLegalEntity ?? true;
+	const buyerLegalName = buyerIsLegalEntity
+		? (invoice.recipient.company ?? invoice.recipient.name ?? 'Empfänger')
+		: (invoice.recipient.name ?? invoice.recipient.company ?? 'Empfänger');
+	const buyerTradingName = buyerIsLegalEntity
+		? undefined
+		: normalizedTradingName(invoice.recipient.company, buyerLegalName);
 
 	const supplierCountry = normalizeCountryCode(settings.country);
 	const customerCountry = normalizeCountryCode(invoice.recipient.country);
@@ -148,9 +159,19 @@ function buildInvoiceData(invoice: RenderInvoice, settings: Settings): Invoice {
 		}
 	];
 
-	const paymentInstructions = buildPaymentInstructions(settings, sellerBusinessName, invoice);
+	const paymentInstructions = buildPaymentInstructions(
+		settings,
+		sellerTradingName ?? sellerLegalName,
+		invoice
+	);
 	const paymentTerms = buildPaymentTerms(invoice);
 	const notes = extractNotes(invoice.notes);
+	const supplierLegalEntity = buildPartyLegalEntity(
+		sellerTradingName ?? sellerLegalName,
+		settings.vatId ?? undefined,
+		settings.legalStatus ?? undefined
+	);
+	const customerLegalEntity = buildPartyLegalEntity(buyerTradingName ?? buyerLegalName);
 
 	const ublInvoice = {
 		'cbc:CustomizationID': FACTURX_CUSTOMIZATION_ID,
@@ -166,14 +187,10 @@ function buildInvoiceData(invoice: RenderInvoice, settings: Settings): Invoice {
 				'cbc:EndpointID': sellerEndpoint.id,
 				'cbc:EndpointID@schemeID': sellerEndpoint.scheme,
 				'cac:PartyName': {
-					'cbc:Name': sellerPersonName
+					'cbc:Name': sellerLegalName
 				},
 				'cac:PostalAddress': supplierAddress,
-				'cac:PartyLegalEntity': {
-					'cbc:RegistrationName': sellerBusinessName,
-					...(settings.vatId ? { 'cbc:CompanyID': settings.vatId } : {}),
-					...(settings.legalStatus ? { 'cbc:CompanyLegalForm': settings.legalStatus } : {})
-				}
+				'cac:PartyLegalEntity': supplierLegalEntity
 			}
 		},
 		'cac:AccountingCustomerParty': {
@@ -181,12 +198,10 @@ function buildInvoiceData(invoice: RenderInvoice, settings: Settings): Invoice {
 				'cbc:EndpointID': buyerEndpoint.id,
 				'cbc:EndpointID@schemeID': buyerEndpoint.scheme,
 				'cac:PartyName': {
-					'cbc:Name': buyerName
+					'cbc:Name': buyerLegalName
 				},
 				'cac:PostalAddress': customerAddress,
-				'cac:PartyLegalEntity': {
-					'cbc:RegistrationName': buyerName
-				}
+				'cac:PartyLegalEntity': customerLegalEntity
 			}
 		},
 		...(paymentInstructions ? { 'cac:PaymentMeans': [paymentInstructions] } : {}),
@@ -443,6 +458,36 @@ function formatQuantity(value: number): string {
 
 function formatPercentage(value: number): string {
 	return roundToTwo(value).toString();
+}
+
+function normalizedTradingName(
+	tradingName: string | null | undefined,
+	legalName: string | null | undefined
+): string | undefined {
+	const normalizedTrading = tradingName?.trim();
+	if (!normalizedTrading) {
+		return undefined;
+	}
+
+	const normalizedLegal = legalName?.trim();
+	if (normalizedLegal && normalizedTrading === normalizedLegal) {
+		return undefined;
+	}
+
+	return normalizedTrading;
+}
+
+function buildPartyLegalEntity(
+	registrationName?: string,
+	companyId?: string,
+	legalForm?: string
+): Invoice['ubl:Invoice']['cac:AccountingSupplierParty']['cac:Party']['cac:PartyLegalEntity'] {
+	const entity = {
+		'cbc:RegistrationName': registrationName?.trim() || 'Unbekannt',
+		...(companyId ? { 'cbc:CompanyID': companyId } : {}),
+		...(legalForm ? { 'cbc:CompanyLegalForm': legalForm } : {})
+	};
+	return entity;
 }
 
 function sanitizeIban(iban?: string | null): string | undefined {
